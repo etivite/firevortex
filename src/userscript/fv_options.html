@@ -1,0 +1,340 @@
+
+    <div class="above_body"></div>
+	<div class="body_wrapper">
+	
+<div class="breadcrumb" id="breadcrumb">
+	<ul class="floatcontainer">
+	<li class="navbithome"><a accesskey="1" href="index.php"><img alt="Home" src="/images/vmg/misc/navbit-home.png" title="Home"></a></li>
+	<li class="navbit"><a href="usercp.php">Settings</a></li>
+	<li class="navbit lastnavbit"><span>Edit FireVortex</span></li>
+	</ul>
+	<hr>
+</div>
+	
+		<br style="clear:both;" />
+		<div id="usercp_content">
+			<div class="cp_content">
+				<form id="profileform" class="block">
+					<h2 class="blockhead">Edit FireVortex Settings</h2>
+					
+					<div class="blockbody formcontrols settings_form_border">
+	
+						<h3 class="blocksubhead">General</h3>
+						<div class="section">
+							<div class="blockrow">
+								<label for="myPage">My FireVortex</label>
+								<div class="rightcol">
+									<select tabindex="1" id="myPage" class="primary" name="myPage">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<div class="rightcol">
+									<label for="myPageItemsNewPostThreadSubscriptions">New Post Items</label>
+									<select tabindex="1" id="myPageItemsNewPostThreadSubscriptions" name="myPageItemsNewPostThreadSubscriptions">
+										<option value="5">5</option>
+										<option value="10">10</option>
+										<option value="15">15</option>
+										<option value="20">20</option>
+										<option value="25">25</option>
+										<option value="30">30</option>
+										<option value="35">35</option>
+									</select>
+								</div>
+								<div class="rightcol">
+									<label for="myPageItemsThreadSubscriptions">Thread Subscription Items</label>
+									<select tabindex="1" id="myPageItemsThreadSubscriptions" name="myPageItemsThreadSubscriptions">
+										<option value="5">5</option>
+										<option value="10">10</option>
+										<option value="15">15</option>
+										<option value="20">20</option>
+										<option value="25">25</option>
+										<option value="30">30</option>
+										<option value="35">35</option>
+									</select>
+								</div>
+								<p class="description">Displays New Posts, Subscribed Topics, and Subcribed Forums feeds on forum homepage when logged in.</p>
+							</div>
+							<div class="blockrow">
+								<label for="fullIgnoreUser">Extend Ignore Users</label>
+								<div class="rightcol">
+									<select tabindex="1" id="fullIgnoreUser" class="primary" name="fullIgnoreUser">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Removes threads started by, quotes, and removes vBulletins ignore user message post.</p>
+							</div>
+							<div class="blockrow">
+								<label for="keyBindHidePage">Hide Page</label>
+								<div class="rightcol">
+									<select tabindex="3" id="keyBindHidePage" class="primary" name="keyBindHidePage">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Use the keyboard shortcut: alt+z which toggles page blank.</p>
+							</div>
+							<div class="blockrow">
+								<label for="superSizeMe">SuperSize Forums</label>
+								<div class="rightcol">
+									<select tabindex="2" id="superSizeMe" class="primary" name="superSizeMe">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Removes all extra whitespace, banners, header and footer. <a href="http://adblockplus.org/en/">Adblock Plus</a> is recommended to increase browsing performance. Use this filter subscription to remove third-party sites and ads: http:\/\/update.firevortex.net\/abp\/vmg.supersizeme.txt</p><p class="description">You can add filter subscriptions by opening Adblock Plus preferences (press Ctrl+Shift+E). Then add a new subscription by going to menu Filters / Add filter subscription. Once you are done with your changes click OK.</p>
+							</div>
+						</div>
+
+						<h3 class="blocksubhead">Forums</h3>
+						<div class="section">
+							<div class="blockrow">
+								<label for="forumKillThreads">Kill a Thread</label>
+								<div class="rightcol">
+									<select tabindex="4" id="forumKillThreads" class="primary" name="forumKillThreads">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Removed selected threads from view within a forum category</p>
+							</div>
+							<div class="blockrow">
+								<label for="forumKillAllStickies">Kill Stickies</label>
+								<div class="rightcol">
+									<select tabindex="5" id="forumKillAllStickies" class="primary" name="forumKillAllStickies">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Remove stickies</p>
+							</div>
+							<div class="blockrow">
+								<label for="forumKillAllLocks">Kill Locked</label>
+								<div class="rightcol">
+									<select tabindex="6" id="forumKillAllLocks" class="primary" name="forumKillAllLocks">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Remove locked threads</p>
+							</div>
+							<div class="blockrow">
+								<label for="previewHover">Preview Posts</label>
+								<div class="rightcol">
+									<select tabindex="7" id="previewHover" class="primary" name="previewHover">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Preview the first or last post for a given thread.</p>
+							</div>
+							<div class="blockrow">
+								<label for="forumThreadsPreview">Preview Topics</label>
+								<div class="rightcol">
+									<select tabindex="7" id="forumThreadsPreview" class="primary" name="forumThreadsPreview">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Preview new topics for a given forum.</p>
+							</div>
+							<div class="blockrow">
+								<label for="forumLinkedClassifieds">Linked Classifieds</label>
+								<div class="rightcol">
+									<select tabindex="7" id="forumLinkedClassifieds" class="primary" name="forumLinkedClassifieds">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Display new topics feeds for linked Parts and Cars classifieds in a sub model forum</p>
+							</div>
+							<div class="blockrow">
+								<label>Page Refresh Timer</label>
+								<div class="rightcol">
+									<label for="forumRefresh"></label>
+									<select tabindex="4" id="forumRefresh" class="primary" name="forumRefresh">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<div class="rightcol">
+									<label for="forumRefreshRate">Rate (Minutes)</label>
+									<select tabindex="1" id="forumRefreshRate" name="forumRefreshRate">
+										<option value="5">5</option>
+										<option value="10">10</option>
+										<option value="15">15</option>
+										<option value="20">20</option>
+										<option value="25">25</option>
+									</select>
+								</div>
+								<p class="description">Auto-refresh a forum category and my post pages.</p>
+							</div>
+						</div>
+
+						<h3 class="blocksubhead">Topics</h3>
+						<div class="section">
+							<div class="blockrow">
+								<label for="threadQuickReply">Quick Reply</label>
+								<div class="rightcol">
+									<select tabindex="1" id="threadQuickReply" class="primary" name="threadQuickReply">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description"></p>
+							</div>
+							<div class="blockrow">
+								<label for="threadFirstPostExcerpt">View First Post Excerpt</label>
+								<div class="rightcol">
+									<select tabindex="2" id="threadFirstPostExcerpt" class="primary" name="threadFirstPostExcerpt">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Displays the excerpt of the first post on each page.</p>
+							</div>
+							<div class="blockrow">
+								<label for="threadKillQuotedImages">Remove Quoted Images</label>
+								<div class="rightcol">
+									<select tabindex="3" id="threadKillQuotedImages" class="primary" name="threadKillQuotedImages">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Remove (replaced with a link) images within quoted posts.</p>
+							</div>
+							<div class="blockrow">
+								<label for="threadKillQuoteInSigs">Remove Quotes in Signatures</label>
+								<div class="rightcol">
+									<select tabindex="3" id="threadKillQuoteInSigs" class="primary" name="threadKillQuoteInSigs">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Remove quotes within signatues.</p>
+							</div>
+
+							<div class="blockrow">
+								<label for="threadKillItalicQuotesText">Remove Italic text in Quotes</label>
+								<div class="rightcol">
+									<select tabindex="3" id="threadKillItalicQuotesText" class="primary" name="threadKillItalicQuotesText">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Remove the italics font from quoted text</p>
+							</div>
+
+							<div class="blockrow">
+								<label for="emoticons">Enable Emoticons</label>
+								<div class="rightcol">
+									<select tabindex="3" id="emoticons" class="primary" name="emoticons">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description">Enable custom emoticons on thread reply/post/quick reply.</p>
+							</div>
+							
+							<div class="blockrow singlebutton">
+								<label>Emoticons:</label>
+								<div class="rightcol">
+									<a id="fv-edit-emoticonlist" class="button">Edit Emoticon List</a>
+								</div>
+								<div id="fv-edit-emoticonlist-panel"></div>
+								<p class="description">Add your own emoticon image links (use full url, ie http://somedomain.com/someonestolenimage.gif ).</p>
+								<div id="fv-ajax-emoticonlist-panel"></div>
+							</div>
+							
+						</div>
+
+
+						<h3 class="blocksubhead">Highlight</h3>
+						<div class="section">
+
+							<div class="blockrow">
+								<label for="threadUserHighlight">All Highlighting</label>
+								<div class="rightcol">
+									<select tabindex="3" id="threadUserHighlight" class="primary" name="threadUserHighlight">
+										<option value="1">Enable</option>
+										<option value="0">Disable</option>
+									</select>
+								</div>
+								<p class="description"></p>
+							</div>								
+
+							<fieldset class="blockrow">
+								<legend>Highlight Colors</legend>
+								<ul class="group">
+									<li>
+										<select tabindex="3" id="threadUserHighlightOwn" class="primary" name="threadUserHighlightOwn"><option value="1">Enable</option><option value="0">Disable</option></select>
+
+										<label for="threadUserHighlightColorOwn">Self:</label>
+										<input type="hidden" value="" name="threadUserHighlightColorOwn" id="threadUserHighlightColorOwn" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="threadUserHighlightAdvertisers" class="primary" name="threadUserHighlightAdvertisers"><option value="1">Enable</option><option value="0">Disable</option></select>
+									</li><li>
+										<label for="threadUserHighlightColorBanner">Banner Advertiser:</label>
+										<input type="hidden" value="" name="threadUserHighlightColorBanner" id="threadUserHighlightColorBanner" class="colors">
+									</li><li>
+										<label for="threadUserHighlightColorClassified">Classified Advertiser:</label>
+										<input type="hidden" value="" name="threadUserHighlightColorClassified" id="threadUserHighlightColorClassified" class="colors">
+									</li><li>
+										<label for="threadUserHighlightColorForum">Forum Advertiser:</label>
+										<input type="hidden" value="" name="threadUserHighlightColorForum" id="threadUserHighlightColorForum" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="threadUserHighlightVMG" class="primary" name="threadUserHighlightVMG"><option value="1">Enable</option><option value="0">Disable</option></select>
+									</li><li>
+										<label for="threadUserHighlightColorVMG">VMG Staff, Moderators, Admins</label>
+										<input type="hidden" value="" name="threadUserHighlightColorVMG" id="threadUserHighlightColorVMG" class="colors">
+									</li><li>
+										<label for="threadUserHighlightColorFV">FireVortex Admin</label>
+										<input type="hidden" value="" name="threadUserHighlightColorFV" id="threadUserHighlightColorFV" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="threadUserHighlightIgnore" class="primary" name="threadUserHighlightIgnore"><option value="1">Enable</option><option value="0">Disable</option></select>
+										
+										<label for="threadUserHighlightColorIgnore">Ignored Users</label>
+										<input type="hidden" value="" name="threadUserHighlightColorIgnore" id="threadUserHighlightColorIgnore" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="threadUserHighlightBuddy" class="primary" name="threadUserHighlightBuddy"><option value="1">Enable</option><option value="0">Disable</option></select>
+										
+										<label for="threadUserHighlightColorBuddy">Friends and Following</label>
+										<input type="hidden" value="" name="threadUserHighlightColorBuddy" id="threadUserHighlightColorBuddy" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="forumSubscriptionHighlight" class="primary" name="forumSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select>
+										
+										<label for="forumSubscriptionHighlightColor">Subscribed Forums</label>
+										<input type="hidden" value="" name="forumSubscriptionHighlightColor" id="forumSubscriptionHighlightColor" class="colors">
+									</li>
+									<li>
+										<select tabindex="3" id="threadSubscriptionHighlight" class="primary" name="threadSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select>
+										
+										<label for="threadSubscriptionHighlightColor">Subscribed Topics</label>
+										<input type="hidden" value="" name="threadSubscriptionHighlightColor" id="threadSubscriptionHighlightColor" class="colors">
+									</li>
+								</ul>
+								<p class="description"></p>
+							</fieldset>
+						</div>
+
+
+					</div>
+					
+					<div class="blockfoot actionbuttons settings_form_border">
+						<div class="group">
+							<input id="savefvsettings" type="submit" accesskey="s" tabindex="1" value="Save Changes" class="button">
+						</div>
+						<div class="confirm"></div>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+		<div id="usercp_nav"> <div class="block"></div></div>
+	</div>

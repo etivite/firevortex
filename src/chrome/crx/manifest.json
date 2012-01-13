@@ -1,0 +1,16 @@
+{
+   "content_scripts": [ {
+      "exclude_globs": [ "http://ads2.vortexmediagroup.com/*", "http://www.google-analytics.com/*", "http://prstats.postrelease.com/*", "http://*.gmodules.com/*", "http://*.googlesyndication.com/*", "http://pagead2.googlesyndication.com/*", "http://*.vortexmediagroup.com/*", "http://googleads.g.doubleclick.net/*", "http://*.doubleclick.net/*", "http://ad.linksynergy.com/*", "http://click.linksynergy.com/*", "http://stats.big-boards.com/*", "http://*.youtube.com/*", "http://youtube.com/*", "http://*.archive.org/*", "http://vwvortex.jbrlsr.com/*", "http://la.jbrlsr.com/*", "http://www.stumbleupon.com/*", "http://http.cdnlayer.com/*", "http://ads.adbrite.com/*", "http://*.adbrite.com/*", "http://ad.technoratimedia.com/*", "http://ad-cdn.technoratimedia.com/*", "http://*.technoratimedia.com/*", "http://*.turn.com/*", "http://*.yieldmanager.com/*", "http://*.scorecardresearch.com/*", "http://*.quantserve.com/*", "http://*.viglink.com/*", "http://*.realmedia.com/*", "http://m.audizine.com/*" ],
+      "include_globs": [ "http://forums.vwvortex.com/*", "http://forums.fourtitude.com/*", "http://forums.thecarlounge.net/*", "http://forums.thecarlounge.com/*", "http://forums.subdriven.com/*", "http://forums.swedespeed.com/*", "http://forums.mwerks.com/*", "http://forums.triplezoom.com/*", "http://forums.speedarena.com/*", "http://forums.motivemag.com/*", "http://forums.turbonines.com/*", "http://forums.kilometermagazine.com/*", "http://www.audizine.com/forum/*", "http://audizine.com/forum/*" ],
+      "js": [ "firevortex.js" ],
+      "matches": [ "http://*/*", "https://*/*" ]
+   } ],
+   "converted_from_user_script": true,
+   "description": "An enhancement for the VWVortex, The Car Lounge, Fourtitude, and AudiZine community forums - http://firevortex.net",
+   "name": "FireVortex",
+   "version": "2.0.1016",
+   "icons": { "16": "icon16.png",
+           "48": "icon48.png",
+          "128": "icon128.png" },
+   "homepage_url": "http://firevortex.net"
+}

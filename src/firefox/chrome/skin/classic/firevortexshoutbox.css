@@ -1,0 +1,33 @@
+
+.splitpannel {
+  margin: 0px !important;
+  padding: 0px !important;
+  border: 0px !important;
+}
+.splitpannel-bar {
+  border-top: 1px solid ThreeDHighlight;
+  border-bottom: 1px solid ThreeDShadow;
+}
+#splitpannel-box {
+  min-height: 20px;
+  min-width: 20px;
+  height: 200px;
+  width: 200px;
+}
+
+#splitpannel-close-button {
+  list-style-image: url("chrome://firevortexvmgforumscript/skin/close.png");
+  -moz-appearance: none;
+  -moz-image-region: rect(0px, 16px, 16px, 0px);
+  padding: 4px 2px;
+  border: none !important;
+}
+
+#splitpannel-close-button {
+  -moz-image-region: rect(0px, 32px, 16px, 16px);
+}
+
+#splitpannel-close-button:hover:active {
+  -moz-image-region: rect(0px, 48px, 16px, 32px);
+}
+

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<overlay id="firevortexoverlay"  xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type='application/x-javascript' src='chrome://firevortex/content/xmlhttprequester.js'></script>
+	<script type='application/x-javascript' src='chrome://firevortex/content/prefman.js'></script>
+	<script type='application/x-javascript' src='chrome://firevortex/content/script-compiler.js'></script>
+	<script type='application/x-javascript' src='chrome://firevortex/content/firevortexfirstrun.js'></script>
+</overlay>

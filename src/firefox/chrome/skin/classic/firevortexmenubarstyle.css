@@ -1,0 +1,9 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+#fvListButton {
+  list-style-image: url("chrome://firevortexvmgforumscript/skin/fvlogo.png");
+  -moz-box-orient: horizontal;
+}
+
+toolbar[iconsize="small"] #fvListButton {
+  list-style-image: url("chrome://firevortexvmgforumscript/skin/favicon.png");
+}
