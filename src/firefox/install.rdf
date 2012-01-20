@@ -1,1 +1,22 @@
-<?xml version="1.0"?><RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#"><Description about="urn:mozilla:install-manifest"><em:id>{50ba92ba-8f28-11dc-8314-0800200c9a66}</em:id><em:name>FireVortex</em:name><em:version>2.0.10162011</em:version><em:description>An enhancement for the VWVortex, The Car Lounge, Fourtitude, and AudiZine community forums - http://firevortex.net</em:description><em:iconURL>chrome://firevortex/skin/fvlogo.png</em:iconURL><em:creator>rich fuller (rich!)</em:creator><em:contributor>ThatGuyRyan (Page Ownage)</em:contributor><em:contributor>.skully. (Neglected Tester)</em:contributor><em:contributor>ATL_Av8r (Smartass)</em:contributor><em:homepageURL>http://firevortex.net</em:homepageURL><em:updateURL>http://update.firevortex.net/vmg.update.rdf?id=%ITEM_ID%&amp;version=%ITEM_VERSION%&amp;status=%ITEM_STATUS%&amp;swv=%APP_VERSION%</em:updateURL><em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDw6hPt8z8qg3J90dmokbMPti5jcHzAFOVqOc405lWMiKm5arYevP2HhhEsz0vKn9Yl2XQ2ejLp9iOKhWFlUdRUk+grJaP4HuKkygj1EjHd1kM/LnN7x5u8HWbmjvNVVTklW4/Ynbm/IvK2UXhPzIgLNZrJy7i8NG5IJrLXL+VGIwIDAQAB</em:updateKey><em:targetApplication><Description><em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id><em:minVersion>3.6.*</em:minVersion><em:maxVersion>9.0.*</em:maxVersion></Description></em:targetApplication></Description></RDF>
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+	<Description about="urn:mozilla:install-manifest">
+		<em:id>{50ba92ba-8f28-11dc-8314-0800200c9a66}</em:id>
+		<em:name>FireVortex</em:name><em:version>2.0.10162011</em:version>
+		<em:description>An enhancement for the VWVortex, The Car Lounge, Fourtitude, and AudiZine community forums - http://firevortex.net</em:description>
+		<em:iconURL>chrome://firevortex/skin/fvlogo.png</em:iconURL>
+		<em:creator>rich fuller (rich!)</em:creator>
+		<em:contributor>ThatGuyRyan (Page Ownage)</em:contributor>
+		<em:contributor>.skully. (Neglected Tester)</em:contributor>
+		<em:contributor>ATL_Av8r (Smartass)</em:contributor>
+		<em:homepageURL>http://firevortex.net</em:homepageURL>
+		<em:updateURL>http://update.firevortex.net/vmg.update.rdf?id=%ITEM_ID%&amp;version=%ITEM_VERSION%&amp;status=%ITEM_STATUS%&amp;swv=%APP_VERSION%</em:updateURL>
+		<em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDw6hPt8z8qg3J90dmokbMPti5jcHzAFOVqOc405lWMiKm5arYevP2HhhEsz0vKn9Yl2XQ2ejLp9iOKhWFlUdRUk+grJaP4HuKkygj1EjHd1kM/LnN7x5u8HWbmjvNVVTklW4/Ynbm/IvK2UXhPzIgLNZrJy7i8NG5IJrLXL+VGIwIDAQAB</em:updateKey>
+		<em:targetApplication>
+			<Description><em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+				<em:minVersion>3.6.*</em:minVersion>
+				<em:maxVersion>12.0.*</em:maxVersion>
+			</Description>
+		</em:targetApplication>
+	</Description>
+</RDF>
