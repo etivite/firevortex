@@ -61,7 +61,7 @@
 
 //set some constants
 const VERSION = {
-	fv : "2.1.05182012",
+	fv : "2.1.05212012",
 	created : new Date(2007, 01, 25),
 	updated : new Date(2012, 05, 18),
 };
@@ -720,6 +720,10 @@ var FireVortex = {
     searchSingleContentTypePageProcessor: function() {
 		FireVortex.Scripts.injectGoogleSearchTab();
 		$("#forumchoice").attr("size","15");
+		
+		GM_addStyle("#forumchoice { font-size: 120% ! important }");
+		GM_addStyle("#forumchoice { width: 50% ! important }");
+		
 	},
 
     searchMultipleContentTypePageProcessor: function() {
@@ -831,7 +835,7 @@ FireVortex.Scripts = {
 
 			var newFooterDivElement = document.createElement("div");
 			newFooterDivElement.setAttribute("id","fv-footer");
-			newFooterDivElement.innerHTML = "<p class='fv-footertagline'><span style='color:#CE6D0D'>.:</span> Enhanced by <a href='http://firevortex.net/about/"+ VERSION.fv +"/'>FireVortex</a> (v."+ VERSION.fv +"BETA) - it will break and missing a ton of features <span style='color:#CE6D0D'>::</span> <a href='http://twitter.com/firevortex' target='_blank'>Twitter</a> <span style='color:#CE6D0D'>::</span> <a title='SHOUTbox!' id='fv-footer-sb' href='http://forums.vwvortex.com/forumdisplay.php?5224'>SHOUTbox</a> <span style='color:#CE6D0D'>:.</span></p><p id='fv-timer'></p>";
+			newFooterDivElement.innerHTML = "<p class='fv-footertagline'><span style='color:#CE6D0D'>.:</span> Enhanced by <a href='http://firevortex.net/about/"+ VERSION.fv +"/'>FireVortex</a> (v."+ VERSION.fv +"BETA) - it will break and missing a ton of features <span style='color:#CE6D0D'>::</span> <a href='http://twitter.com/firevortex' target='_blank'>Twitter</a> <span style='color:#CE6D0D'>::</span> <a title='SHOUTbox!' id='fv-footer-sb' href='forumdisplay.php?5224'>SHOUTbox</a> <span style='color:#CE6D0D'>:.</span></p><p id='fv-timer'></p>";
 
 			newFooterContDivElement.appendChild(newFooterDivElement);
 			body.insertBefore(newFooterContDivElement, body.nextChild);
@@ -1564,8 +1568,10 @@ FireVortex.Scripts = {
 		//insert preview button
 		$('ol#threads h3.threadtitle').each( function (i) {
 			var id = $(this).find('a.title').attr('id');
-			id = id.substring(13); //thread_title_<threadid>
-			$(this).prepend('<span class="fv-preview-p-btn" id="'+ id +'">[p]</span> - ').css( 'cursor', 'pointer');
+			if (id) {
+				id = id.substring(13); //thread_title_<threadid>
+				$(this).prepend('<span class="fv-preview-p-btn" id="'+ id +'">[p]</span> - ').css( 'cursor', 'pointer');
+			}
 		});
 
 		//first post
@@ -2355,7 +2361,16 @@ FireVortex.Scripts = {
 				yPath: 'http://shout.firevortex.net/',
 				log: 2
 		});
+
+		var minmax = getSessionObject('fv_minmaxshoutbox' );
 		
+		if ( minmax && !minmax.open) {
+			$('#fv-ot-yshout').animate({height:'84px'}, 500);
+		} else {
+			var minmax = { open: true };
+			setSessionObject('fv_minmaxshoutbox', minmax);
+		}
+
 
 //TODO - jquery it
 			w.insertIt = function (tagOpen,tagClose) {
@@ -2995,7 +3010,7 @@ FireVortex.UI.Panel = {
 		GM_addStyle('.fv-panel .dropdown dd, .fv-panel .dropdown dt, .fv-panel .dropdown ul { margin:0px; padding:0px; }.fv-panel .dropdown dd { position:relative; }.fv-panel .dropdown { margin-top:5px; }.fv-panel .dropdown a{ color:#816c5b; text-decoration:none; outline:none;}.fv-panel .dropdown a:hover { color:#5d4617;}.fv-panel .dropdown dt a:hover, .fv-panel .dropdown dt a:focus { color:#5d4617; border: 1px solid #5d4617;}.fv-panel .dropdown dt a {background:#e4dfcb url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8%2F9hAAAABGdBTUEAAK%2FINwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAACHSURBVHjaYvz%2F%2Fz8DJYBxGBmwZn4SyZpDEucxMDFQCNAN6ALi%2FwTwbSAWxWVAGRDPxWPhUyB2BuLXuAwAgXRQkGARfw3V%2FAifF0DgLxBHA%2FE%2BJLGPQOwJxDcJhQEM%2FAJiHyA%2BBcTfgdgfiM9iU8iCx7%2FfobYaAPFBYmMBHbxD88pwzAsAAQYAWCA25%2BSAqKIAAAAASUVORK5CYII%3D) no-repeat scroll right center; display:block; padding-right:20px; border:1px solid #d4ca9a; width:150px;}.fv-panel .dropdown dt a span {cursor:pointer; display:block; padding:5px;}.fv-panel .dropdown dd ul { background:#e4dfcb none repeat scroll 0 0; border:1px solid #d4ca9a; color:#C5C0B0; display:none;left:0px; padding:5px 0px; position:absolute; top:2px; width:auto; min-width:170px; list-style:none; max-height: 200px; overflow: auto;}.fv-panel .dropdown span.value { display:none;}.fv-panel .dropdown dd ul li a { padding:5px; display:block;}.fv-panel .dropdown dd ul li a:hover { background-color:#d0c9af;} #fv-panel-meta { font-size: 10px; margin-top:8px;padding:1px;}#fv-panel-meta a { color:#CE6D0D;text-decoration:none;}');
 		
 		
-		$('body').append('<div id="fv-panel" class="fv-panel"><h3>FireVortex</h3><div style="clear:both;"></div><div id="fv-panel-data" rel="loading"><div id="fv-panel-loading-msg">loading data...</div></div><div style="clear:both;"></div><div id="fv-panel-meta"><a title="FireVortex About" href="http://firevortex.net/about/'+ VERSION.fv +'/">About</a> | <a title="FireVortex Settings" href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">Settings</a> | <a title="Donate! Daddy needs diapers" href="http://firevortex.net/donate/" target="_blank">Donate</a> | <a title="SHOUTbox!" id="fv-panel-sb" href="http://forums.vwvortex.com/forumdisplay.php?5224">SB</a></div></div><a class="fv-panel-trigger" href="#">FV</a>');
+		$('body').append('<div id="fv-panel" class="fv-panel"><h3>FireVortex</h3><div style="clear:both;"></div><div id="fv-panel-data" rel="loading"><div id="fv-panel-loading-msg">loading data...</div></div><div style="clear:both;"></div><div id="fv-panel-meta"><a title="FireVortex About" href="http://firevortex.net/about/'+ VERSION.fv +'/">About</a> | <a title="FireVortex Settings" href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">Settings</a> | <a title="Donate! Daddy needs diapers" href="http://firevortex.net/donate/" target="_blank">Donate</a> | <a title="SHOUTbox!" id="fv-panel-sb" href="/forumdisplay.php?5224">SB</a></div></div><a class="fv-panel-trigger" href="#">FV</a>');
 		
 		
 		$(".fv-panel-trigger").click(function(){
@@ -3671,7 +3686,7 @@ YShout.prototype = {
 		var postForm = 
 			'<form id="ys-post-form"' + (this.prefs.inverse ? 'class="ys-inverse"' : '' ) + '><fieldset><input id="ys-input-message" value="' + this.prefs.defaultMessage + '" type="text" accesskey="M" maxlength="' + this.prefs.messageLength + '" spellcheck="true" class="ys-before-focus" />' +
 				(this.prefs.showSubmit ? '<input id="ys-input-submit" value="' + this.prefs.defaultSubmit + '" accesskey="S" type="submit" />' : '') +
-				'<a href=\"javascript:linkIt()\" title ="Create Link"><img border="0" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAASAAAAEgARslrPgAAA09JREFUeNpNk81PHHUAhp+Z2WV2YT/Y8lVZF0xpClWkSqhtwmKCUoVQY5pUwagx4eTF8B948oIXjYlejErSxGq91INiIFgMxRQDpjRCEVAKZXe7bNldFmZ2Pn4z40FteM9PnryXR/I8j6MbnRvpAd4DzgJ1gA/YB+Y91/vsk56vfjrKS/8LRudGfMA4cPmVRJ8aC9ZR0qvQLRCOgSDLdGZCOMKZEsJ5/YuBbw4fCUbnRvzAja7ap7pfSvRSMlRMLDZKEhWeyp7u4gmLIDoZc5aF9MIdYYvnv37t+r7835PxzppT3cnGLvKOhS1LCCFTFhXoVJA3VXaNIDv7fppCz9F1vLXDMu2rAErhwnYS+PDNUxeVPxyNDGXKruDQCJE3/ZQMWE8dsK9pqLE9pOg652vbmF757cSV+fEl5dzIsx+93HiuXVKCZGQBXj2POSEWswplQ2YldYgbKKA2/4kZWSfnFvAVHNprEvLivdVjPuBsIhLntp4mF5B5UmnBRbC1a2EYZaLHPUrHJtlwi2B6VAuV9ZxJ3xOd2KZ42gfUVPqq2NLT7Jo64coTFK0whYJLtM6gPqaTc56hZC6hegccPNwjX6wkFAxjW6La53meJHlgmSU8Evj8DhO3bKRgiMyGQPYiNNaVCR/0UErZGCxgW5vgeQghJJ8j3HzJKsVrlGrCgTNspVykrVVaeMjj9TWs3sxwhzZsWXDGXaatqYV0NsD87F1c0yv5hC1+v5ffjp+sTDCVmkX79ZDOYJyhobfRNI2WnR18s/NoNrwzfJlAhZ9MJsPi4iLRTMxUOoZO7y3vbr4xeDIp35iaJrYb4uKrl3j/48+5fvUKm5t/09IUx9zP8fP0NNe+u0ZBz9Dbc4HCdtEvfzn47aRl2j9OrvxCeC9INBwFoPr8ALphMjw8TDKZZGBggP7+fgyzjNJq/MtEq2UfgG3ab82s375ZS6SDXBYA/db3SJ7L2NgYVVVVAGiahufC0sR9ffBdKlOplPEopv5PXwjrKeOHyF+x5IvdfVI8nsAvK2SzWdbW1lBVlebmZhoaGrCFXdy5v8PMzMwD6WjOra2tSn1v7WjoQeSDxvrGgFqhShISd6XloqM4m+2i47SEhGmaTjqdzmmadukf+rikqtXp4HYAAAAielRYdFNvZnR3YXJlAAB42nNMyU9KVfDMTUxPDUpNTKkEAC+cBdSuDKlNAAAAAElFTkSuQmCC"></a>&nbsp;<a href=\"javascript:linkImg()\" title ="Insert Image"><img border ="0" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAArwAAAK8AFCrDSYAAAB8UlEQVR42qWTPWtUQRSGnzP33r33Zhd2IRvDRqIkAcEiiKmM/gELCxurpLCQ9AEbf4S/QUxnoZWFWBj/QUCwCISIoOaLfGw2m+zcnTljEbNmN0GEDNPNOc855533SAiBq5wYYOn9yktVmTsuNLPukqiBGkkMWcKrZ49nFmMADTL/6MH4SJZlIhL9s2JHwbsu7z6tPQVOAcdW0zTNZOnzPh12ackqE6Pb5EkTF5S9w5yva1WGwm1ihnn+ZAKvIr0RCgfGRBiBwmwyUd8mLX2naVs474jTlMnxBt/Wy9RKdVQHNABQwBjBhh1KyT4HJ02s71A4hwtt0jSlbXOGc0Mg9ITpB4gQnGJ9l46znHQthTq8AtIlqCc2wvmfMz2hwykgY4RWu0wgwarHOo9IiXarQqU0RhQZCHJxhBBOR6hE1/m5uUU122CobEjFcbQ3xNZmg0Z1ktj8Te4BwnlAco2x/C4/VpapVX4h3pN0RrgxNU8la+BV+2zR18Hq7gJeFa/KLbvD7PhNFFjf2OLD0Qv0UFFV4ONAByEgwMOZxd5DNH3AcXuXbOML9fsLzEVJnzPPdIwB5BK/+ryGz2vY+tQlfhwQMUukiXard0bvgcgfVDi7F5KdK4gjCT1AKZY3b5fXZwsfpv9nOeMIEsNrALnqOv8GBm/ak/c4FDIAAAAuelRYdFNvZnR3YXJlAAB42vNNTC7Kz01NyUxUcMssSi3PL8ouVvCNUDAyMDABAJYuCXpmsVrSAAAAAElFTkSuQmCC"></a></fieldset></form>';
+				'<a href=\"javascript:linkIt()\" title ="Create Link"><img border="0" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAASAAAAEgARslrPgAAA09JREFUeNpNk81PHHUAhp+Z2WV2YT/Y8lVZF0xpClWkSqhtwmKCUoVQY5pUwagx4eTF8B948oIXjYlejErSxGq91INiIFgMxRQDpjRCEVAKZXe7bNldFmZ2Pn4z40FteM9PnryXR/I8j6MbnRvpAd4DzgJ1gA/YB+Y91/vsk56vfjrKS/8LRudGfMA4cPmVRJ8aC9ZR0qvQLRCOgSDLdGZCOMKZEsJ5/YuBbw4fCUbnRvzAja7ap7pfSvRSMlRMLDZKEhWeyp7u4gmLIDoZc5aF9MIdYYvnv37t+r7835PxzppT3cnGLvKOhS1LCCFTFhXoVJA3VXaNIDv7fppCz9F1vLXDMu2rAErhwnYS+PDNUxeVPxyNDGXKruDQCJE3/ZQMWE8dsK9pqLE9pOg652vbmF757cSV+fEl5dzIsx+93HiuXVKCZGQBXj2POSEWswplQ2YldYgbKKA2/4kZWSfnFvAVHNprEvLivdVjPuBsIhLntp4mF5B5UmnBRbC1a2EYZaLHPUrHJtlwi2B6VAuV9ZxJ3xOd2KZ42gfUVPqq2NLT7Jo64coTFK0whYJLtM6gPqaTc56hZC6hegccPNwjX6wkFAxjW6La53meJHlgmSU8Evj8DhO3bKRgiMyGQPYiNNaVCR/0UErZGCxgW5vgeQghJJ8j3HzJKsVrlGrCgTNspVykrVVaeMjj9TWs3sxwhzZsWXDGXaatqYV0NsD87F1c0yv5hC1+v5ffjp+sTDCVmkX79ZDOYJyhobfRNI2WnR18s/NoNrwzfJlAhZ9MJsPi4iLRTMxUOoZO7y3vbr4xeDIp35iaJrYb4uKrl3j/48+5fvUKm5t/09IUx9zP8fP0NNe+u0ZBz9Dbc4HCdtEvfzn47aRl2j9OrvxCeC9INBwFoPr8ALphMjw8TDKZZGBggP7+fgyzjNJq/MtEq2UfgG3ab82s375ZS6SDXBYA/db3SJ7L2NgYVVVVAGiahufC0sR9ffBdKlOplPEopv5PXwjrKeOHyF+x5IvdfVI8nsAvK2SzWdbW1lBVlebmZhoaGrCFXdy5v8PMzMwD6WjOra2tSn1v7WjoQeSDxvrGgFqhShISd6XloqM4m+2i47SEhGmaTjqdzmmadukf+rikqtXp4HYAAAAielRYdFNvZnR3YXJlAAB42nNMyU9KVfDMTUxPDUpNTKkEAC+cBdSuDKlNAAAAAElFTkSuQmCC"></a>&nbsp;<a href=\"javascript:linkImg()\" title ="Insert Image"><img border ="0" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAArwAAAK8AFCrDSYAAAB8UlEQVR42qWTPWtUQRSGnzP33r33Zhd2IRvDRqIkAcEiiKmM/gELCxurpLCQ9AEbf4S/QUxnoZWFWBj/QUCwCISIoOaLfGw2m+zcnTljEbNmN0GEDNPNOc855533SAiBq5wYYOn9yktVmTsuNLPukqiBGkkMWcKrZ49nFmMADTL/6MH4SJZlIhL9s2JHwbsu7z6tPQVOAcdW0zTNZOnzPh12ackqE6Pb5EkTF5S9w5yva1WGwm1ihnn+ZAKvIr0RCgfGRBiBwmwyUd8mLX2naVs474jTlMnxBt/Wy9RKdVQHNABQwBjBhh1KyT4HJ02s71A4hwtt0jSlbXOGc0Mg9ITpB4gQnGJ9l46znHQthTq8AtIlqCc2wvmfMz2hwykgY4RWu0wgwarHOo9IiXarQqU0RhQZCHJxhBBOR6hE1/m5uUU122CobEjFcbQ3xNZmg0Z1ktj8Te4BwnlAco2x/C4/VpapVX4h3pN0RrgxNU8la+BV+2zR18Hq7gJeFa/KLbvD7PhNFFjf2OLD0Qv0UFFV4ONAByEgwMOZxd5DNH3AcXuXbOML9fsLzEVJnzPPdIwB5BK/+ryGz2vY+tQlfhwQMUukiXard0bvgcgfVDi7F5KdK4gjCT1AKZY3b5fXZwsfpv9nOeMIEsNrALnqOv8GBm/ak/c4FDIAAAAuelRYdFNvZnR3YXJlAAB42vNNTC7Kz01NyUxUcMssSi3PL8ouVvCNUDAyMDABAJYuCXpmsVrSAAAAAElFTkSuQmCC"></a>&nbsp;<span style="float:right;"><a title="Min" style="font-size: 120%" id="fv-ys-togglesb">-</a>&nbsp;|&nbsp;<a href="/forumdisplay.php?5224" id="fv-ys-closesb">Close</a></span></fieldset></form>';
 
 		var postsDiv = '<div id="fv-ot-ys-posts"></div>';
 
@@ -3710,6 +3725,39 @@ YShout.prototype = {
 
 		$('#ys-input-submit').click(function(){ self.send.apply(self) });
 		$('#ys-post-form').submit(function(){ return false });
+		
+		$("#fv-ys-closesb").click(function(){
+			w.sessionStorage.removeItem('fv_launchshoutbox' );
+			w.sessionStorage.removeItem('fv_minmaxshoutbox' );
+		});
+		
+		$('#fv-ys-togglesb').click(function() {
+			
+			var minmax = getSessionObject('fv_minmaxshoutbox' );
+			
+			if ( minmax.open ) {
+				minmax = { open: false };
+
+				$(this).attr('title','Max').text('+');
+				
+				$('#fv-ot-yshout').animate({height:'84px'}, 500);
+				
+			} else {
+				minmax = { open: true };
+				
+				$(this).attr('title','Min').text('-');
+				
+				$('#fv-ot-yshout').animate({height:'350px'}, 500);
+				
+			}
+			
+			setSessionObject('fv_minmaxshoutbox' , minmax);
+			
+			return false;
+			
+		}).css( 'cursor', 'pointer');
+		
+		
 	},
 
 	initRefresh: function() {
