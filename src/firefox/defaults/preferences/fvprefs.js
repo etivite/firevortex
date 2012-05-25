@@ -36,6 +36,8 @@ pref("firevortex.parseRefreshRate", '5');
 pref("firevortex.myPage", true);
 pref("firevortex.myPageItemsNewPostThreadSubscriptions", '15');
 pref("firevortex.myPageItemsThreadSubscriptions", '15');
+pref("firevortex.myPageItemsRecentThreads", '15');
+pref("firevortex.myPageItemsRecentSearches", '15');
 pref("firevortex.app.services.rewriteLinks", false);
 pref("firevortex.app.version", "-1");
 pref("firevortex.app.firstrun", true);

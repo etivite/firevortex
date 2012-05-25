@@ -49,6 +49,12 @@
 // @include       http://www.audizine.com/forum/*
 // @include       http://audizine.com/forum/*
 
+
+//TODO - add http://www.passatworld.com/forums/ (on vbul 4.18)
+//TODO - add http://volkswagenownersclub.com/vw/
+//TODO - add http://forums.generationdub.com/
+
+
 // ==/UserScript==
 //
 // FireVortex
@@ -61,9 +67,9 @@
 
 //set some constants
 const VERSION = {
-	fv : "2.1.05212012",
+	fv : "2.1.05262012",
 	created : new Date(2007, 01, 25),
-	updated : new Date(2012, 05, 18),
+	updated : new Date(2012, 05, 26),
 };
 
 const REQUEST_HEADERS = "Mozilla/4.0 (compatible) Greasemonkey (FireVortex."+ VERSION.fv +")";
@@ -520,6 +526,9 @@ var FireVortex = {
 			
 			FireVortex.Scripts.injectMyPageRefresh( FireVortex.Config.getForumRefreshRate() );
 		}
+		
+		if ( domainKey == 1 || domainKey == 0 ) FireVortex.Scripts.injectWhatsGoingOnExtend();
+		
 	},
 
     /**
@@ -568,7 +577,7 @@ var FireVortex = {
 	
 			if ( isForumFirstPage() && FireVortex.Config.getForumLinkedClassifieds() && domainKey == 0 ) FireVortex.Scripts.injectForumLinkedClassifieds( forumId );
 			
-			if ( forumId == '5224' && w.LOGGEDIN && domainKey != 10) {
+			if ( forumId == '5224' && w.LOGGEDIN && domainKey != 10  && isForumFirstPage() ) {
 				
 				var launchsb = getSessionObject( 'fv_launchshoutbox' );
 				
@@ -658,6 +667,8 @@ var FireVortex = {
 		if ( FireVortex.Config.getEmoticons() ) FireVortex.UI.Emoticons.init();
 		FireVortex.Scripts.injectPageMaxWidth();
 		
+		if ( FireVortex.Config.getFullIgnoreUser() ) FireVortex.Scripts.injectKillIgnoredQuotesReply();
+		
 	},
 
     /**
@@ -723,6 +734,8 @@ var FireVortex = {
 		
 		GM_addStyle("#forumchoice { font-size: 120% ! important }");
 		GM_addStyle("#forumchoice { width: 50% ! important }");
+		
+		FireVortex.Scripts.trackSearchesRecent();
 		
 	},
 
@@ -815,6 +828,12 @@ FireVortex.Scripts = {
 			w.localStorage.removeItem('fv_newpostthreadsubscriptionlist');
 			w.localStorage.removeItem('fv_forumsubscriptionlist');
 			w.localStorage.removeItem('fv_recentviewedthreads');
+			w.localStorage.removeItem('fv_recentsearches');
+			w.localStorage.removeItem('fv_standardemoticonlist');
+			w.localStorage.removeItem('fv_halloweenemoticonlist');
+			
+			w.sessionStorage.removeItem('fv_minmaxshoutbox');
+			w.sessionStorage.removeItem('fv_launchshoutbox');
 			
 		}
 		
@@ -1044,7 +1063,7 @@ FireVortex.Scripts = {
 		
 
 		//
-		//recent threads
+		//recent viewed threads
 		//
 		var sublist = getStorageObject( 'fv_recentviewedthreads' );
 		
@@ -1054,15 +1073,75 @@ FireVortex.Scripts = {
 
 			var html = '';
 
-			for ( var i = sublist.threadids.length - 1; i >= 0; i-- ) {
+			sublist.titles.reverse();
+			sublist.threadids.reverse();
+			
+			for ( var i = 0; i < sublist.threadids.length && i < parseInt( FireVortex.Config.getMyPageItemsRecentThreads() ); i++ ) {
 				html += '<li><h3><a href="'+ SERVER_HOST +'/showthread.php?'+ sublist.threadids[i] +'&goto=newpost">'+ sublist.titles[i] +'</a></h3></li>';
 			}			
 
 			$('div#fv-fv_recentviewedthreadslist div.feed-content').html( '<ul>'+ html +'</ul>' );
 		}		
+
+		//
+		//recent searches
+		//
+		var sublist = getStorageObject( 'fv_recentsearches' );
+		
+		if ( sublist ) {
+					
+			$('#fv-my-page div.floatcontainer').append( '<div class="wgo_subblock" id="fv-fv_recentsearcheslist"><h3>Recent Searches - fetched <time class="timeago" datetime="'+ sublist.updated +'"></time></h3><div class="feed-content">loading...</div></div>' );
+
+			var html = '';
+
+			sublist.serialized.reverse();
+			sublist.query.reverse();
+
+			for ( var i = 0; i < sublist.query.length && i < parseInt( FireVortex.Config.getMyPageItemsRecentSearches() ); i++ ) {
+				html += '<li><h3><a href="'+ SERVER_HOST +'/search.php?'+ sublist.serialized[i] +'">'+ sublist.query[i] +'</a></h3></li>';
+			}
+
+			$('div#fv-fv_recentsearcheslist div.feed-content').html( '<ul>'+ html +'</ul>' );
+		}	
 		
 		//register updated ago timestamp
 		$("time.timeago").timeago();
+		
+	},
+
+	injectWhatsGoingOnExtend: function() {
+		
+		//http://www.vwvortex.com/artman/publish/rss.xml
+		//http://fourtitude.com/feed/
+		
+			$('#wgo div.floatcontainer').append('<div class="wgo_subblock" id="fv-vmgbloglist"><h3>VMG Blogs</h3><div class="feed-content">loading...</div></div>' );
+		
+			$.getFeed({
+		        url: SERVER_HOST +'/blog_external.php?type=RSS2',
+		        cache: false,
+		        success: function(feed) {
+		
+					var html = '';
+		
+					if ( !$(feed.items).length ) {
+						html = 'No news items found';
+					}
+		
+					$(feed.items).each(function() {
+						var $item = $(this);
+						html += '<li><h3><a href ="' + $item.attr("link") + '">' + $item.attr("title") + '</a></h3></li>';
+					});
+		
+					$('div#fv-vmgbloglist div.feed-content').html( '<ul>'+ html +'</ul>' );
+					
+		        }
+		    });
+
+
+		//if vwvortex domain
+
+		    
+		//if fourtitude domain
 		
 	},
 
@@ -1381,6 +1460,48 @@ FireVortex.Scripts = {
 		
 	},
 	
+	trackSearchesRecent: function() {
+		
+		$('#searchform').submit(function() {
+			
+		    var $inputs = $('#searchform :input');
+
+		    var svalues = {};
+		    $inputs.each(function() {
+				svalues[this.name] = $(this).val();
+		    });
+
+		    //exclude the security token
+		    var values = $("#searchform :input[value][name!='securitytoken']").serialize();
+
+			var recentSearches = getStorageObject('fv_recentsearches');
+		
+			if ( recentSearches && recentSearches.query ) {
+				
+				if ( recentSearches.query.length > 34 ) {
+					recentSearches.serialized.shift();
+					recentSearches.query.shift();
+				}
+				
+				recentSearches.serialized.push( values );
+				recentSearches.query.push( svalues.query );
+				recentSearches.updated = new Date();
+			
+				setStorageObject('fv_recentsearches' , recentSearches );
+				
+			} else {
+			
+				recentlist = { "updated" : new Date(), "query" : new Array(), "serialized" : new Array() };
+				recentlist.serialized.push( values );
+				recentlist.query.push( svalues.query );
+					
+				setStorageObject('fv_recentsearches' , recentlist);
+				
+			}
+			
+		});
+		
+	},
 	
 	injectThreadFirstPostExcerpt: function() {
 		$('div#pagetitle').append('<div id="fv-pageexcerpt">'+ $('meta[name=description]').attr('content').replace( /\n/g, '<br />\n' ) +'</div>');
@@ -2212,6 +2333,26 @@ FireVortex.Scripts = {
 			
 		}
 	},
+
+	injectKillIgnoredQuotesReply: function() {
+		
+		var ignorelist = getStorageObject( 'fv_ignorelist' );
+
+		if (ignorelist && ignorelist.usernames.length ) {
+			GM_addStyle(".isignored { background-color: "+ FireVortex.Config.getThreadUserHighlightColorIgnore() +" !important; }");
+			
+			//loop over quotes
+			$("ul#postlist div.bbcode_postedby strong").each(function (i) {
+				var usern = $(this).text();
+
+				if ( $.inArray( usern, ignorelist.usernames) != -1 ) {
+					$(this).parent().parent().parent().addClass('isignored');
+					$(this).parent().next().addClass('fv-ignored-quote').hide();	
+				}
+			});
+			
+		}
+	},
 	
 	injectKillIgnoredPosts: function() {
 
@@ -2231,7 +2372,7 @@ FireVortex.Scripts = {
 		
 		var linkedClassifieds = {
 			"0" : {
-				"2":"808,809", "3":"810,811", "4":"812,813", "5":"824,825", "7":"818,819", "9":"838,839", "6":"820,821", "8":"826,827", "10":"531,899", "11":"802,807", "13":"832,833", "25":"812,813", "26":"529,903", "39":"828,829", "71":"834,835", "112":"1133,1135,", "142":"816,817", "145":"814,815", "152":"836,837", "549":"530,904",  "550":"529,903", "728":"822,823", "731":"855,907", "786":"984,985", "865":"1056,1057", "970":"1150,1151", "1149":"1152,1153", "1062":"1179,1180", "1061":"1181,1182", "1136": "1188,1189", "1051":"1071,1072", "548":"532,902", "870":"1049,1050", "5310":"5313,5314", "1190":"5323,5324", "5309":"5333,5334"
+				"2":"808,809", "3":"810,811", "4":"812,813", "5":"824,825", "7":"818,819", "9":"838,839", "6":"820,821", "8":"826,827", "10":"531,899", "11":"802,807", "13":"832,833", "25":"812,813", "26":"529,903", "39":"828,829", "71":"834,835", "112":"1133,1135,", "142":"816,817", "145":"814,815", "152":"836,837", "549":"530,904",  "550":"529,903", "728":"822,823", "731":"855,907", "786":"984,985", "865":"1056,1057", "970":"1150,1151", "1149":"1152,1153", "1062":"1179,1180", "1061":"1181,1182", "1136": "1188,1189", "1051":"1071,1072", "548":"532,902", "870":"1049,1050", "5310":"5313,5314", "1190":"5323,5324", "5309":"5333,5334", "5001":"5317,5318"
 			}
 		};
 
@@ -2852,6 +2993,7 @@ FireVortex.UI.Emoticons = {
 
 	init: function() {
 		//this.loadData();
+		this.loadStandardData();
 		this.loadHalloweenData();
 		
 		this.loadHtml();
@@ -2861,9 +3003,10 @@ FireVortex.UI.Emoticons = {
 		
 		var d = new Date();
 		
-		GM_addStyle('#fv-emoticons {width:83%;max-height:75px; overflow:auto;padding-left:5px;margin-top: 10px;} #fv-emoticonlist li { display: inline; list-style-type: none; padding-right: 20px; margin-bottom: 8px;} ');
+		GM_addStyle('#fv-emoticons {width:83%;max-height:75px; overflow:auto;padding-left:5px;margin-top: 10px;} #fv-emoticons-add {margin-top: 5px;margin-bottom:5px;} #fv-emoticonlist li { display: inline; list-style-type: none; padding-right: 20px; margin-bottom: 8px;} ');
 		
 		$("#vB_Editor_001").parent().append('<div id="fv-emoticons"><div><ul id="fv-emoticonlist"></ul></div></div>');
+		
 		
 		var emoticonlist = getStorageObject( 'fv_emoticonlist' );
 
@@ -2872,7 +3015,15 @@ FireVortex.UI.Emoticons = {
 				$("#fv-emoticonlist").append('<li><a href="" class="fv-emoticon-item"><img src="'+ emoticonlist.emoticons[i].url +'" rel="'+ emoticonlist.emoticons[i].url +'" border="0"/></a></li>');
 			}			
 		} else {
-			$("#fv-emoticonlist").append('<li><a href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">No emoticons found - add them via FireVortex Settings.</a></li>');
+			$("#fv-emoticons").append('<div id="fv-emoticons-add"><a href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">Add more emoticons via the FireVortex Settings.</a></div>');
+		}
+		
+		//standard selection
+		var semoticonlist = getStorageObject( 'fv_standardemoticonlist' );
+		if ( semoticonlist && semoticonlist.emoticons.length ) {
+			for ( var i = 0; i < semoticonlist.emoticons.length; i++ ) {
+				$("#fv-emoticonlist").append('<li><a href="" class="fv-emoticon-item"><img src="'+ semoticonlist.emoticons[i].url +'" rel="'+ semoticonlist.emoticons[i].url +'" border="0"/></a></li>');
+			}			
 		}
 		
 		//Holiday - Halloween
@@ -2903,7 +3054,7 @@ FireVortex.UI.Emoticons = {
 
 		var d = new Date();
 
-		GM_addStyle('#fv-emoticonlist li { display: inline; list-style-type: none; padding-right: 20px; } ');
+		GM_addStyle('#fv-emoticons-add {margin-top: 5px;margin-bottom:5px;} #fv-emoticonlist li { display: inline; list-style-type: none; padding-right: 20px; } ');
 		
 		if ( domainKey == 10 ) {
 			
@@ -2928,8 +3079,17 @@ FireVortex.UI.Emoticons = {
 						$("#fv-emoticonlist").append('<li><a href="" class="fv-emoticon-item"><img src="'+ emoticonlist.emoticons[i].url +'" rel="'+ emoticonlist.emoticons[i].url +'" border="0"/></a></li>');
 					}			
 				} else {
-					$("#fv-emoticonlist").append('<li><a href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">No emoticons found - add them via FireVortex Settings.</a></li>');
+					$("#fvqr-emoticons-panel").append('<div id="fv-emoticons-add"><a href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">Add more emoticons via the FireVortex Settings.</a></div>');
 				}
+				
+				//standard selection
+				var semoticonlist = getStorageObject( 'fv_standardemoticonlist' );
+				if ( semoticonlist && semoticonlist.emoticons.length ) {
+					for ( var i = 0; i < semoticonlist.emoticons.length; i++ ) {
+						$("#fv-emoticonlist").append('<li><a href="" class="fv-emoticon-item"><img src="'+ semoticonlist.emoticons[i].url +'" rel="'+ semoticonlist.emoticons[i].url +'" border="0"/></a></li>');
+					}			
+				}
+				
 				
 				//Holiday - Halloween
 				if ( d.getMonth() == 9 ) {				
@@ -2967,6 +3127,29 @@ FireVortex.UI.Emoticons = {
 		//fv-ajax-emoticonlist-panel
 		//load data to div - when clicked, add to new input box text and clone the blank
 		
+		
+	},
+
+
+	loadStandardData: function() {
+
+		//load only once
+		var standardlist = getStorageObject( 'fv_standardemoticonlist' );
+
+		if ( !standardlist ) {
+
+			var thelist = ["004","006","007","032","036","022","047","057","049","053","055","059","065","071","039","074","128","091","105","111","118","070","119","003" ];
+
+			var emoticonlist = { "updated" : null, "emoticons" : new Array() };
+
+			for ( var i = 0; i < thelist.length; i++ ) {
+				var emoticon = { "fvstandard" : false, "shortcode" : false, "url" : "http://e.tinytex.com/g/" + thelist[i] + ".gif", "added" : new Date() };		
+				emoticonlist.emoticons.push(emoticon);
+			}
+
+			emoticonlist.updated = new Date();
+			setStorageObject('fv_standardemoticonlist' , emoticonlist);
+		}
 		
 	},
 	
@@ -3021,6 +3204,7 @@ FireVortex.UI.Panel = {
 				FireVortex.UI.Panel.createSubscribedNewThreadsList();
 				FireVortex.UI.Panel.createSubscribedThreadsList();
 				FireVortex.UI.Panel.createRecentlyViewedThreadsList();
+				FireVortex.UI.Panel.createRecentSearchesList();
 				FireVortex.UI.Panel.createFriendsFollowList();
 				
 				$("#fv-panel-data").attr("rel", "done");
@@ -3126,7 +3310,6 @@ FireVortex.UI.Panel = {
 		var sublist = getStorageObject( 'fv_recentviewedthreads' );
 
 		if ( sublist ) {
-			//for ( var i = 0; i < sublist.threadids.length; i++ ) {
 			for ( var i = sublist.threadids.length - 1; i >= 0; i-- ) {
 				$("#fv-panel-recentthreads-list").append('<li><a href="'+ SERVER_HOST +'/showthread.php?'+ sublist.threadids[i] +'&goto=newpost">'+ sublist.titles[i].substring(0, 50) +'</a></li>');
 			}			
@@ -3137,6 +3320,28 @@ FireVortex.UI.Panel = {
 		$("a#fv-panel-recentthreads-select").click(function() {
 			if ( !$("#fv-panel-recentthreads-list").is(":visible") ) $(".dropdown dd ul").hide();
 			$("#fv-panel-recentthreads-list").toggle();
+			return false;
+		});
+		
+	},
+
+	createRecentSearchesList: function() {
+
+		$("#fv-panel-data").append('<dl id="fv-panel-recentsearches-dd" class="dropdown"><dt><a id="fv-panel-recentsearches-select" href="#"><span>Recent Searches</span></a></dt><dd><ul id="fv-panel-recentsearches-list"></ul></dd></dl>');
+		
+		var sublist = getStorageObject( 'fv_recentsearches' );
+
+		if ( sublist ) {
+			for ( var i = sublist.query.length - 1; i >= 0; i-- ) {
+				$("#fv-panel-recentsearches-list").append('<li><a href="'+ SERVER_HOST +'/search.php?'+ sublist.serialized[i] +'">'+ sublist.query[i] +'</a></li>');
+			}			
+		} else {
+			$("#fv-panel-recentsearches-list").append('<li><a href="/search.php?search_type=1">No recent searches</a></li>');
+		}
+		
+		$("a#fv-panel-recentsearches-select").click(function() {
+			if ( !$("#fv-panel-recentsearches-list").is(":visible") ) $(".dropdown dd ul").hide();
+			$("#fv-panel-recentsearches-list").toggle();
 			return false;
 		});
 		
@@ -3188,7 +3393,7 @@ FireVortex.UI.Options = {
 		
 		GM_addStyle('#fv-edit-emoticonlist-panel p { margin:10px 0; } #fv-edit-emoticonlist-panel p:first-child span.emoticon-remove { display:none; } .emoticon-preview{ padding-left: 5px;padding-right:3px; } .emoticon-remove { color:red; cursor:pointer;} .emoticon-add { color:green; cursor:pointer;}');
 		
-		$('body').prepend('<div class="above_body"></div><div class="body_wrapper"><div class="breadcrumb"id="breadcrumb"><ul class="floatcontainer"><li class="navbithome"><a accesskey="1"href="index.php"><img alt="Home"src="/images/vmg/misc/navbit-home.png"title="Home"></a></li><li class="navbit"><a href="usercp.php">Settings</a></li><li class="navbit lastnavbit"><span>Edit FireVortex</span></li></ul><hr></div><br style="clear:both;"/><div id="usercp_content"><div class="cp_content"><form id="profileform"class="block"><h2 class="blockhead">Edit FireVortex Settings</h2><div class="blockbody formcontrols settings_form_border"><h3 class="blocksubhead">General</h3><div class="section"><div class="blockrow"><label for="myPage">My FireVortex</label><div class="rightcol"><select tabindex="1" id="myPage" class="primary" name="myPage"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="myPageItemsNewPostThreadSubscriptions">New Post Items</label><select tabindex="1" id="myPageItemsNewPostThreadSubscriptions" name="myPageItemsNewPostThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsThreadSubscriptions">Thread Subscription Items</label><select tabindex="1" id="myPageItemsThreadSubscriptions" name="myPageItemsThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><p class="description">Displays New Posts, Subscribed Topics, and Subcribed Forums feeds on forum homepage when logged in.</p></div><div class="blockrow"><label for="fullIgnoreUser">Extend Ignore Users</label><div class="rightcol"><select tabindex="1"id="fullIgnoreUser"class="primary"name="fullIgnoreUser"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes threads started by,quotes,and removes vBulletins ignore user message post.</p></div><div class="blockrow"><label for="keyBindHidePage">Hide Page</label><div class="rightcol"><select tabindex="3"id="keyBindHidePage"class="primary"name="keyBindHidePage"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Use the keyboard shortcut:alt+z which toggles page blank.</p></div><div class="blockrow"><label for="superSizeMe">SuperSize Forums</label><div class="rightcol"><select tabindex="2"id="superSizeMe"class="primary"name="superSizeMe"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes all extra whitespace,banners,header and footer.<a href="http://adblockplus.org/en/">Adblock Plus</a> (available for Chrome too) is recommended to increase browsing performance. Enter this filter subscription url: http:\/\/update.firevortex.net\/abp\/vmg.supersizeme.txt</p><p class="description">You can add filter subscriptions by opening Adblock Plus preferences.Then add a new subscription by going to menu Filters/Add filter subscription.Once you are done with your changes click OK.</p></div></div><h3 class="blocksubhead">Forums</h3><div class="section"><div class="blockrow"><label for="forumKillThreads">Kill a Thread</label><div class="rightcol"><select tabindex="4"id="forumKillThreads"class="primary"name="forumKillThreads"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removed selected threads from view within a forum category</p></div><div class="blockrow"><label for="forumKillAllStickies">Kill Stickies</label><div class="rightcol"><select tabindex="5"id="forumKillAllStickies"class="primary"name="forumKillAllStickies"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove stickies</p></div><div class="blockrow"><label for="forumKillAllLocks">Kill Locked</label><div class="rightcol"><select tabindex="6"id="forumKillAllLocks"class="primary"name="forumKillAllLocks"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove locked threads</p></div><div class="blockrow"><label for="previewHover">Preview Posts</label><div class="rightcol"><select tabindex="7"id="previewHover"class="primary"name="previewHover"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview the first or last post for a given thread.</p></div><div class="blockrow"><label for="forumThreadsPreview">Preview Topics</label><div class="rightcol"><select tabindex="7"id="forumThreadsPreview"class="primary"name="forumThreadsPreview"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview new topics for a given forum.</p></div><div class="blockrow"><label for="forumLinkedClassifieds">Linked Classifieds</label><div class="rightcol"><select tabindex="7" id="forumLinkedClassifieds" class="primary" name="forumLinkedClassifieds"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Display new topics feeds for linked Parts and Cars classifieds in a sub model forum</p></div><div class="blockrow"><label>Page Refresh Timer</label><div class="rightcol"><label for="forumRefresh"></label><select tabindex="4"id="forumRefresh"class="primary"name="forumRefresh"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="forumRefreshRate">Rate(Minutes)</label><select tabindex="1"id="forumRefreshRate"name="forumRefreshRate"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option></select></div><p class="description">Auto-refresh a forum category and my post pages.</p></div></div><h3 class="blocksubhead">Topics</h3><div class="section"><div class="blockrow"><label for="threadQuickReply">Quick Reply</label><div class="rightcol"><select tabindex="1"id="threadQuickReply"class="primary"name="threadQuickReply"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><div class="blockrow"><label for="threadFirstPostExcerpt">View First Post Excerpt</label><div class="rightcol"><select tabindex="2"id="threadFirstPostExcerpt"class="primary"name="threadFirstPostExcerpt"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Displays the excerpt of the first post on each page.</p></div><div class="blockrow"><label for="threadKillQuotedImages">Remove Quoted Images</label><div class="rightcol"><select tabindex="3"id="threadKillQuotedImages"class="primary"name="threadKillQuotedImages"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove(replaced with a link)images within quoted posts.</p></div><div class="blockrow"><label for="threadKillQuoteInSigs">Remove Quotes in Signatures</label><div class="rightcol"><select tabindex="3"id="threadKillQuoteInSigs"class="primary"name="threadKillQuoteInSigs"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove quotes within signatues.</p></div><div class="blockrow"><label for="threadKillItalicQuotesText">Remove Italic text in Quotes</label><div class="rightcol"><select tabindex="3" id="threadKillItalicQuotesText" class="primary" name="threadKillItalicQuotesText"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove the italics font from quoted text</p></div><div class="blockrow"><label for="emoticons">Enable Emoticons</label><div class="rightcol"><select tabindex="3" id="emoticons" class="primary" name="emoticons"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Enable custom emoticons on thread reply/post/quick reply.</p></div><div class="blockrow singlebutton"><label>Emoticons:</label><div class="rightcol"><a id="fv-edit-emoticonlist" class="button">Edit Emoticon List</a></div><div id="fv-edit-emoticonlist-panel"></div><p class="description">Add your own emoticon image links (use full url, ie http://somedomain.com/someonestolenimage.gif ).</p></div></div><h3 class="blocksubhead">Highlight</h3><div class="section"><div class="blockrow"><label for="threadUserHighlight">User Highlight</label><div class="rightcol"><select tabindex="3"id="threadUserHighlight"class="primary"name="threadUserHighlight"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><fieldset class="blockrow"><legend>Highlight Colors</legend><ul class="group"><li><select tabindex="3" id="threadUserHighlightOwn" class="primary" name="threadUserHighlightOwn"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorOwn">Self:</label><input type="hidden" value="" name="threadUserHighlightColorOwn" id="threadUserHighlightColorOwn" class="colors"></li><li><select tabindex="3" id="threadUserHighlightAdvertisers" class="primary" name="threadUserHighlightAdvertisers"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorBanner">Banner Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorBanner" id="threadUserHighlightColorBanner" class="colors"></li><li><label for="threadUserHighlightColorClassified">Classified Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorClassified" id="threadUserHighlightColorClassified" class="colors"></li><li><label for="threadUserHighlightColorForum">Forum Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorForum" id="threadUserHighlightColorForum" class="colors"></li><li><select tabindex="3" id="threadUserHighlightVMG" class="primary" name="threadUserHighlightVMG"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorVMG">VMG Staff, Moderators, Admins</label><input type="hidden" value="" name="threadUserHighlightColorVMG" id="threadUserHighlightColorVMG" class="colors"></li><li><label for="threadUserHighlightColorFV">FireVortex Admin</label><input type="hidden" value="" name="threadUserHighlightColorFV" id="threadUserHighlightColorFV" class="colors"></li><li><select tabindex="3" id="threadUserHighlightIgnore" class="primary" name="threadUserHighlightIgnore"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorIgnore">Ignored Users</label><input type="hidden" value="" name="threadUserHighlightColorIgnore" id="threadUserHighlightColorIgnore" class="colors"></li><li><select tabindex="3" id="threadUserHighlightBuddy" class="primary" name="threadUserHighlightBuddy"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorBuddy">Friends and Following</label><input type="hidden" value="" name="threadUserHighlightColorBuddy" id="threadUserHighlightColorBuddy" class="colors"></li><li><select tabindex="3" id="forumSubscriptionHighlight" class="primary" name="forumSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="forumSubscriptionHighlightColor">Subscribed Forums</label><input type="hidden" value="" name="forumSubscriptionHighlightColor" id="forumSubscriptionHighlightColor" class="colors"></li><li><select tabindex="3" id="threadSubscriptionHighlight" class="primary" name="threadSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadSubscriptionHighlightColor">Subscribed Topics</label><input type="hidden" value="" name="threadSubscriptionHighlightColor" id="threadSubscriptionHighlightColor" class="colors"></li></ul><p class="description"></p></fieldset></div></div><div class="blockfoot actionbuttons settings_form_border"><div class="group"><input id="savefvsettings"type="submit"accesskey="s"tabindex="1"value="Save Changes"class="button"></div><div class="confirm"></div></div></form></div></div><div id="usercp_nav"><div class="block"></div></div></div>');
+		$('body').prepend('<div class="above_body"></div><div class="body_wrapper"><div class="breadcrumb"id="breadcrumb"><ul class="floatcontainer"><li class="navbithome"><a accesskey="1"href="index.php"><img alt="Home"src="/images/vmg/misc/navbit-home.png"title="Home"></a></li><li class="navbit"><a href="usercp.php">Settings</a></li><li class="navbit lastnavbit"><span>Edit FireVortex</span></li></ul><hr></div><br style="clear:both;"/><div id="usercp_content"><div class="cp_content"><form id="profileform"class="block"><h2 class="blockhead">Edit FireVortex Settings</h2><div class="blockbody formcontrols settings_form_border"><h3 class="blocksubhead">General</h3><div class="section"><div class="blockrow"><label for="myPage">My FireVortex</label><div class="rightcol"><select tabindex="1" id="myPage" class="primary" name="myPage"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="myPageItemsNewPostThreadSubscriptions">New Post Items</label><select tabindex="1" id="myPageItemsNewPostThreadSubscriptions" name="myPageItemsNewPostThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsThreadSubscriptions">Thread Subscription Items</label><select tabindex="1" id="myPageItemsThreadSubscriptions" name="myPageItemsThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsRecentThreads">Recently Viewed Threads Items</label><select tabindex="1" id="myPageItemsRecentThreads" name="myPageItemsRecentThreads"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsRecentSearches">Recent Search Items</label><select tabindex="1" id="myPageItemsRecentSearches" name="myPageItemsRecentSearches"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><p class="description">Displays New Posts, Subscribed Topics, and Subcribed Forums feeds on forum homepage when logged in.</p></div><div class="blockrow"><label for="fullIgnoreUser">Extend Ignore Users</label><div class="rightcol"><select tabindex="1"id="fullIgnoreUser"class="primary"name="fullIgnoreUser"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes threads started by,quotes,and removes vBulletins ignore user message post.</p></div><div class="blockrow"><label for="keyBindHidePage">Hide Page</label><div class="rightcol"><select tabindex="3"id="keyBindHidePage"class="primary"name="keyBindHidePage"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Use the keyboard shortcut:alt+z which toggles page blank.</p></div><div class="blockrow"><label for="superSizeMe">SuperSize Forums</label><div class="rightcol"><select tabindex="2"id="superSizeMe"class="primary"name="superSizeMe"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes all extra whitespace,banners,header and footer.<a href="http://adblockplus.org/en/">Adblock Plus</a> (available for Chrome too) is recommended to increase browsing performance. Enter this filter subscription url: http:\/\/update.firevortex.net\/abp\/vmg.supersizeme.txt</p><p class="description">You can add filter subscriptions by opening Adblock Plus preferences.Then add a new subscription by going to menu Filters/Add filter subscription.Once you are done with your changes click OK.</p></div></div><h3 class="blocksubhead">Forums</h3><div class="section"><div class="blockrow"><label for="forumKillThreads">Kill a Thread</label><div class="rightcol"><select tabindex="4"id="forumKillThreads"class="primary"name="forumKillThreads"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removed selected threads from view within a forum category</p></div><div class="blockrow"><label for="forumKillAllStickies">Kill Stickies</label><div class="rightcol"><select tabindex="5"id="forumKillAllStickies"class="primary"name="forumKillAllStickies"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove stickies</p></div><div class="blockrow"><label for="forumKillAllLocks">Kill Locked</label><div class="rightcol"><select tabindex="6"id="forumKillAllLocks"class="primary"name="forumKillAllLocks"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove locked threads</p></div><div class="blockrow"><label for="previewHover">Preview Posts</label><div class="rightcol"><select tabindex="7"id="previewHover"class="primary"name="previewHover"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview the first or last post for a given thread.</p></div><div class="blockrow"><label for="forumThreadsPreview">Preview Topics</label><div class="rightcol"><select tabindex="7"id="forumThreadsPreview"class="primary"name="forumThreadsPreview"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview new topics for a given forum.</p></div><div class="blockrow"><label for="forumLinkedClassifieds">Linked Classifieds</label><div class="rightcol"><select tabindex="7" id="forumLinkedClassifieds" class="primary" name="forumLinkedClassifieds"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Display new topics feeds for linked Parts and Cars classifieds in a sub model forum</p></div><div class="blockrow"><label>Page Refresh Timer</label><div class="rightcol"><label for="forumRefresh"></label><select tabindex="4"id="forumRefresh"class="primary"name="forumRefresh"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="forumRefreshRate">Rate(Minutes)</label><select tabindex="1"id="forumRefreshRate"name="forumRefreshRate"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option></select></div><p class="description">Auto-refresh a forum category and my post pages.</p></div></div><h3 class="blocksubhead">Topics</h3><div class="section"><div class="blockrow"><label for="threadQuickReply">Quick Reply</label><div class="rightcol"><select tabindex="1"id="threadQuickReply"class="primary"name="threadQuickReply"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><div class="blockrow"><label for="threadFirstPostExcerpt">View First Post Excerpt</label><div class="rightcol"><select tabindex="2"id="threadFirstPostExcerpt"class="primary"name="threadFirstPostExcerpt"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Displays the excerpt of the first post on each page.</p></div><div class="blockrow"><label for="threadKillQuotedImages">Remove Quoted Images</label><div class="rightcol"><select tabindex="3"id="threadKillQuotedImages"class="primary"name="threadKillQuotedImages"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove(replaced with a link)images within quoted posts.</p></div><div class="blockrow"><label for="threadKillQuoteInSigs">Remove Quotes in Signatures</label><div class="rightcol"><select tabindex="3"id="threadKillQuoteInSigs"class="primary"name="threadKillQuoteInSigs"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove quotes within signatues.</p></div><div class="blockrow"><label for="threadKillItalicQuotesText">Remove Italic text in Quotes</label><div class="rightcol"><select tabindex="3" id="threadKillItalicQuotesText" class="primary" name="threadKillItalicQuotesText"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove the italics font from quoted text</p></div><div class="blockrow"><label for="emoticons">Enable Emoticons</label><div class="rightcol"><select tabindex="3" id="emoticons" class="primary" name="emoticons"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Enable custom emoticons on thread reply/post/quick reply.</p></div><div class="blockrow singlebutton"><label>Emoticons:</label><div class="rightcol"><a id="fv-edit-emoticonlist" class="button">Edit Emoticon List</a></div><div id="fv-edit-emoticonlist-panel"></div><p class="description">Add your own emoticon image links (use full url, ie http://somedomain.com/someonestolenimage.gif ).</p></div></div><h3 class="blocksubhead">Highlight</h3><div class="section"><div class="blockrow"><label for="threadUserHighlight">User Highlight</label><div class="rightcol"><select tabindex="3"id="threadUserHighlight"class="primary"name="threadUserHighlight"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><fieldset class="blockrow"><legend>Highlight Colors</legend><ul class="group"><li><select tabindex="3" id="threadUserHighlightOwn" class="primary" name="threadUserHighlightOwn"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorOwn">Self:</label><input type="hidden" value="" name="threadUserHighlightColorOwn" id="threadUserHighlightColorOwn" class="colors"></li><li><select tabindex="3" id="threadUserHighlightAdvertisers" class="primary" name="threadUserHighlightAdvertisers"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorBanner">Banner Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorBanner" id="threadUserHighlightColorBanner" class="colors"></li><li><label for="threadUserHighlightColorClassified">Classified Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorClassified" id="threadUserHighlightColorClassified" class="colors"></li><li><label for="threadUserHighlightColorForum">Forum Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorForum" id="threadUserHighlightColorForum" class="colors"></li><li><select tabindex="3" id="threadUserHighlightVMG" class="primary" name="threadUserHighlightVMG"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorVMG">VMG Staff, Moderators, Admins</label><input type="hidden" value="" name="threadUserHighlightColorVMG" id="threadUserHighlightColorVMG" class="colors"></li><li><label for="threadUserHighlightColorFV">FireVortex Admin</label><input type="hidden" value="" name="threadUserHighlightColorFV" id="threadUserHighlightColorFV" class="colors"></li><li><select tabindex="3" id="threadUserHighlightIgnore" class="primary" name="threadUserHighlightIgnore"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorIgnore">Ignored Users</label><input type="hidden" value="" name="threadUserHighlightColorIgnore" id="threadUserHighlightColorIgnore" class="colors"></li><li><select tabindex="3" id="threadUserHighlightBuddy" class="primary" name="threadUserHighlightBuddy"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorBuddy">Friends and Following</label><input type="hidden" value="" name="threadUserHighlightColorBuddy" id="threadUserHighlightColorBuddy" class="colors"></li><li><select tabindex="3" id="forumSubscriptionHighlight" class="primary" name="forumSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="forumSubscriptionHighlightColor">Subscribed Forums</label><input type="hidden" value="" name="forumSubscriptionHighlightColor" id="forumSubscriptionHighlightColor" class="colors"></li><li><select tabindex="3" id="threadSubscriptionHighlight" class="primary" name="threadSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadSubscriptionHighlightColor">Subscribed Topics</label><input type="hidden" value="" name="threadSubscriptionHighlightColor" id="threadSubscriptionHighlightColor" class="colors"></li></ul><p class="description"></p></fieldset></div></div><div class="blockfoot actionbuttons settings_form_border"><div class="group"><input id="savefvsettings"type="submit"accesskey="s"tabindex="1"value="Save Changes"class="button"></div><div class="confirm"></div></div></form></div></div><div id="usercp_nav"><div class="block"></div></div></div>');
 	},
 	
 	loadOptions: function() {
@@ -3209,6 +3414,8 @@ FireVortex.UI.Options = {
 		$('#myPage option[value="'+ is10( FireVortex.Config.getMyPage() ) +'"]').attr("selected",true);
 		$('#myPageItemsNewPostThreadSubscriptions option[value="'+ FireVortex.Config.getMyPageItemsNewPostThreadSubscriptions() +'"]').attr("selected",true);
 		$('#myPageItemsThreadSubscriptions option[value="'+ FireVortex.Config.getMyPageItemsThreadSubscriptions() +'"]').attr("selected",true);
+		$('#myPageItemsRecentThreads option[value="'+ FireVortex.Config.getMyPageItemsRecentThreads() +'"]').attr("selected",true);
+		$('#myPageItemsRecentSearches option[value="'+ FireVortex.Config.getMyPageItemsRecentSearches() +'"]').attr("selected",true);
 		
 		//Forums
 		$('#forumKillThreads option[value="'+ is10( FireVortex.Config.getForumKillThreads() ) +'"]').attr("selected",true);
@@ -3288,7 +3495,8 @@ FireVortex.UI.Options = {
 			FireVortex.Config.setMyPage( $('#myPage :selected').attr('value') == 1 ? true: false );
 			FireVortex.Config.setMyPageItemsNewPostThreadSubscriptions( $('#myPageItemsNewPostThreadSubscriptions :selected').attr('value') );
 			FireVortex.Config.setMyPageItemsThreadSubscriptions( $('#myPageItemsThreadSubscriptions :selected').attr('value') );
-
+			FireVortex.Config.setMyPageItemsRecentThreads( $('#myPageItemsRecentThreads :selected').attr('value') );
+			FireVortex.Config.setMyPageItemsRecentSearches( $('#myPageItemsRecentSearches :selected').attr('value') );
 
 			//Forums
 			FireVortex.Config.setForumKillThreads( $('#forumKillThreads :selected').attr('value') == 1 ? true: false );
@@ -3456,8 +3664,11 @@ FireVortex.UI.Debug = {
 		$('.cp_content').append( "<div style='margin-bottom:25px;'><h2>Forum Subscription List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject( 'fv_forumsubscriptionlist' ) ) +"</code></p></div>" );
 
 		$('.cp_content').append( "<div style='margin-bottom:25px;'><h2>Recently Viewed Thread List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject( 'fv_recentviewedthreads' ) ) +"</code></p></div>" );
+
+		$('.cp_content').append( "<div style='margin-bottom:25px;'><h2>Recent Searches List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject('fv_recentsearches') ) +"</code></p></div>" );
 		
 		$('.cp_content').append( "<div><h2>Emoticon List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject( 'fv_emoticonlist' ) ) +"</code></p></div>" );
+
 						
 	},
 	
@@ -3530,6 +3741,8 @@ FireVortex.Config = {
 		this._booleanProperty("myPage", true);
 		this._booleanProperty("myPageItemsNewPostThreadSubscriptions", '15');
 		this._booleanProperty("myPageItemsThreadSubscriptions", '15');
+		this._booleanProperty("myPageItemsRecentThreads", '15');
+		this._booleanProperty("myPageItemsRecentSearches", '15');
 
     },
 
