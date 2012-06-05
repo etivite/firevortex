@@ -48,6 +48,7 @@
 // @include       http://forums.kilometermagazine.com/*
 // @include       http://www.audizine.com/forum/*
 // @include       http://audizine.com/forum/*
+// @include       http://www.namotorsports.net/*
 
 
 //TODO - add http://www.passatworld.com/forums/ (on vbul 4.18)
@@ -59,7 +60,7 @@
 //
 // FireVortex
 // Created 2007-01-25
-// Updated 2012-05-26
+// Updated 2012-06-05
 // Copyright (c) 2007-11, Rich Fuller - rich@firevortex.net
 // This work is licensed under a Attribution-Noncommercial-No Derivative Works 3.0 United States License
 // http://creativecommons.org/licenses/by-nc-nd/3.0/us/
@@ -67,9 +68,9 @@
 
 //set some constants
 const VERSION = {
-	fv : "2.1.05262012",
+	fv : "2.2.06052012",
 	created : new Date(2007, 01, 25),
-	updated : new Date(2012, 05, 26),
+	updated : new Date(2012, 06, 05),
 };
 
 const REQUEST_HEADERS = "Mozilla/4.0 (compatible) Greasemonkey (FireVortex."+ VERSION.fv +")";
@@ -198,6 +199,10 @@ function getChildForumId() {
 	} else {
 		return null;
 	}
+}
+//TODO
+function getParentForumId() {
+		return null;
 }
 function isForumFirstPage() {
 	if ( $('form#forum_display_options input:hidden[name=page]').val() == 1 )
@@ -451,7 +456,7 @@ var FireVortex = {
 		//http://forums.vwvortex.com/misc.php?do=buddylist&focus=1
 		if (wloc.indexOf("/misc.php?do=buddylist&focus=1") != -1 || wloc.indexOf("/external.php") != -1 || wloc.indexOf("/misc.php?do=whoposted") != -1 || wloc.indexOf("misc.php?do=getsmilies") != -1)
             return "deadPage";
-                 		
+            	
         return pageType;
     },
 
@@ -498,7 +503,10 @@ var FireVortex = {
 		FireVortex.Scripts.injectFireVortexTitle();
 		FireVortex.Scripts.injectFireVortexFooter();
 		
-		if ( w.LOGGEDIN ) FireVortex.Scripts.injectFireVortexSettingsPopupLink();
+		if ( w.LOGGEDIN ) {
+			FireVortex.Scripts.injectMyFireVortexPopupLink();
+			FireVortex.Scripts.injectFireVortexSettingsPopupLink();
+		}
 		
 		//bind 
 		if ( FireVortex.Config.getKeyBindHidePage() ) FireVortex.Scripts.hidePage();
@@ -582,6 +590,11 @@ var FireVortex = {
 				var launchsb = getSessionObject( 'fv_launchshoutbox' );
 				
 				if (launchsb && launchsb.launch) FireVortex.Scripts.injectShoutBox();
+			}
+			
+			if ( domainKey != 10 && isForumFirstPage() ) {
+				FireVortex.Parsers.Search.init();
+				FireVortex.Scripts.injectForumRecentProductSearches( forumId );
 			}
 	
 		} else { //on a parent foum page
@@ -762,7 +775,7 @@ var FireVortex = {
 		if ( getUserId() == '208927' ) {
 			$('.cp_content .blockrow').append('<span style=" padding: 5px; color:red;">Who else would love APR? Don\'t ignore this guy.</span>')
 		}
-	}
+	},
 	
 };
 
@@ -805,6 +818,10 @@ FireVortex.Scripts = {
 		if (domainKey != 10) $('div#toplinks ul.isuser li.item ul.popupbody').append('<li><a href="'+ SERVER_HOST +'/profile.php?do=editfirevortex">FireVortex Settings</a></li');
 	},
 
+	injectMyFireVortexPopupLink: function() {
+		if (domainKey != 10) $('div#toplinks ul.isuser li.item ul.popupbody').append('<li><a href="'+ SERVER_HOST +'/index.php#fv-my-page">My FireVortex</a></li');
+	},
+
 	injectGoogleSearchTab: function() {
 		
 		if (domainKey == 10) { //audizine
@@ -831,6 +848,8 @@ FireVortex.Scripts = {
 			w.localStorage.removeItem('fv_recentsearches');
 			w.localStorage.removeItem('fv_standardemoticonlist');
 			w.localStorage.removeItem('fv_halloweenemoticonlist');
+			w.localStorage.removeItem('fv_productsearch');
+			w.localStorage.removeItem('fv_recentviewedproductsearch');
 			
 			w.sessionStorage.removeItem('fv_minmaxshoutbox');
 			w.sessionStorage.removeItem('fv_launchshoutbox');
@@ -854,7 +873,7 @@ FireVortex.Scripts = {
 
 			var newFooterDivElement = document.createElement("div");
 			newFooterDivElement.setAttribute("id","fv-footer");
-			newFooterDivElement.innerHTML = "<p class='fv-footertagline'><span style='color:#CE6D0D'>.:</span> Enhanced by <a href='http://firevortex.net/about/"+ VERSION.fv +"/'>FireVortex</a> (v."+ VERSION.fv +"BETA) - it will break and missing a ton of features <span style='color:#CE6D0D'>::</span> <a href='http://twitter.com/firevortex' target='_blank'>Twitter</a> <span style='color:#CE6D0D'>::</span> <a title='SHOUTbox!' id='fv-footer-sb' href='forumdisplay.php?5224'>SHOUTbox</a> <span style='color:#CE6D0D'>:.</span></p><p id='fv-timer'></p>";
+			newFooterDivElement.innerHTML = "<p class='fv-footertagline'><span style='color:#CE6D0D'>.:</span> Enhanced by <a href='http://firevortex.net/about/"+ VERSION.fv +"/'>FireVortex</a> (v."+ VERSION.fv +") <span style='color:#CE6D0D'>::</span> <a href='https://github.com/etivite/firevortex/issues'>Submit an Issue</a> <span style='color:#CE6D0D'>::</span> <a href='http://twitter.com/firevortex' target='_blank'>Twitter</a> <span style='color:#CE6D0D'>::</span> <a title='SHOUTbox!' id='fv-footer-sb' href='forumdisplay.php?5224'>SHOUTbox</a> <span style='color:#CE6D0D'>:.</span></p><p id='fv-timer'></p>";
 
 			newFooterContDivElement.appendChild(newFooterDivElement);
 			body.insertBefore(newFooterContDivElement, body.nextChild);
@@ -872,7 +891,7 @@ FireVortex.Scripts = {
 	},
 	
 	injectFireVortexTitle: function() {
-		$(document).attr('title', $(document)[0].title + ' - Enhanced by FireVortex (v.'+VERSION.fv+'BETA)' );
+		$(document).attr('title', $(document)[0].title + ' - Enhanced by FireVortex (v.'+VERSION.fv+')' );
 	},
 
 	injectMyPageRefresh: function( rate ) {
@@ -2490,12 +2509,44 @@ FireVortex.Scripts = {
 		
 	},
 	
+//TODO - needs to be forum level
+	injectForumRecentProductSearches: function(id) {
+		
+		var standardlist = getStorageObject( 'fv_productsearch' );
+
+		if ( standardlist ) {
+
+			if ( standardlist.forums[ id ] ) {
+			
+				$('<div id="fv-recentproductsearch" class="forum_info"><div class="collapse"><h4 class="forumoptiontitle"><span class="optiontitle">Recent Product Searches</span></h4></div><div class="forum_info_block"><div class="forum_info_subblock" id="fv-recentproductsearchlist"><div class="feed-content">loading...</div></div></div></div>').insertBefore('#breadcrumb_two');
+	
+				var sublist = getStorageObject( 'fv_recentviewedproductsearch' );
+				html = '';
+				if ( sublist ) {
+	
+					for ( var i = sublist.urls.length - 1; i >= 0; i-- ) {
+						html += '<li><h3><a href ="' + sublist.urls[i] + '">'+ sublist.titles[i] +'</a></h3></li>';		
+					}
+					
+						
+				} else {
+					html = '<li>No recent searches</li>';
+				}
+				
+				$('div#fv-recentproductsearch div.feed-content').html( '<ul>'+ html +'</ul>' );
+				
+			}
+		}
+
+		
+	},
+	
 	
 	injectShoutBox: function() {
 		
 		GM_addStyle('#fv-ot-yshout *{margin:0;padding:0}#fv-ot-yshout a{text-decoration:none;color:#588fb9}#fv-ot-yshout a:hover{color:#3d464d}#fv-ot-yshout a:active{color:#282e33}#fv-ot-yshout{margin:0 auto;width:100%;position:relative;max-height:350px;overflow:auto;font:11px/1.4 Arial,Helvetica,sans-serif}#fv-ot-yshout #fv-ot-ys-posts{position:relative;background:#fff}#fv-ot-yshout .ys-post{border-bottom:1px solid #f7f7f7;margin:0 5px;padding:5px;position:relative;overflow:hidden}#fv-ot-yshout .ys-admin-post .ys-post-nickname{padding-left:10px;background:url(http://style.firevortex.net/icons/bullet_star.png) 0 2px no-repeat}#fv-ot-yshout .ys-post-timestamp{color:#b3b3b3}#fv-ot-yshout .ys-post-nickname{color:#1a1a1a}#fv-ot-yshout .ys-post-message{color:#595959}#fv-ot-yshout .ys-banned-post .ys-post-nickname,#fv-ot-yshout .ys-banned-post .ys-post-message,#fv-ot-yshout .ys-banned-post{color:#b3b3b3 !important}#fv-ot-yshout #ys-banned{position:absolute;z-index:75;width:500px;height:100%;_height:430px;top:0;left:0;margin:0 5px;background:#fff}#fv-ot-yshout #ys-banned span{position:absolute;display:block;height:20px;margin-top:-10px;top:50%;padding:0 20px;color:#666;text-align:center;font-size:13px;z-index:80}#fv-ot-yshout #ys-banned a{color:#999}#fv-ot-yshout #ys-banned a:hover{color:#666}#fv-ot-yshout .ys-post-actions{display:none;position:absolute;top:0;right:0;padding:5px;font-size:11px;z-index:50;background:#fff;color:#b3b3b3}#fv-ot-yshout .ys-post-actions a{color:#7a8c99}#fv-ot-yshout .ys-post-actions a:hover{color:#3d464d}#fv-ot-yshout .ys-post:hover .ys-post-actions{display:block}#fv-ot-yshout .ys-post-info{color:#595959}#fv-ot-yshout .ys-post-info em{font-style:normal;color:#1a1a1a}#fv-ot-yshout .ys-info-overlay{display:none;position:absolute;z-index:45;top:0;left:0;width:100%;height:100%;background:#fff;padding:5px}#fv-ot-yshout .ys-info-inline{display:none;margin-top:2px;padding-top:3px;border-top:1px solid #f2f2f2}#fv-ot-yshout #ys-post-form{height:40px;line-height:40px;background:#ebebeb}#fv-ot-yshout #ys-input-nickname,#fv-ot-yshout #ys-input-message{font-size:11px;padding:2px;background:#fff;border:1px solid #c3c3c3}#fv-ot-yshout #ys-post-form fieldset{_position:absolute;border:none;padding:0 10px;_margin-top:10px}#fv-ot-yshout #ys-input-nickname{width:105px;margin-left:5px}#fv-ot-yshout #ys-input-message{margin-left:5px;width:50%}#fv-ot-yshout #ys-input-submit{font-size:11px;width:64px;margin-left:5px}#fv-ot-yshout #ys-input-submit:hover{cursor:pointer}#fv-ot-yshout .ys-before-focus{color:#b3b3b3}#fv-ot-yshout .ys-after-focus{color:#000}#fv-ot-yshout .ys-input-invalid{}#fv-ot-yshout .ys-post-form-link{margin-left:5px}#ys-overlay{position:fixed;_position:absolute;z-index:100;width:100%;height:100%;top:0;left:0;background-color:#000;filter:alpha(opacity=60);-moz-opacity:0.6;opacity:0.6}* html body{height:100%;width:100%}#ys-closeoverlay-link,#ys-switchoverlay-link{display:block;font-weight:bold;height:13px;font:11px/1 Arial,Helvetica,sans-serif;color:#fff;text-decoration:none;margin-bottom:1px;outline:none;float:left}#ys-switchoverlay-link{float:right}.ys-window{z-index:102;position:fixed;_position:absolute;top:50%;left:50%}#ys-cp{margin-top:-220px;margin-left:-310px;width:620px}#ys-yshout{margin-top:-250px;margin-left:-255px;width:500px}#ys-history{margin-top:-220px;margin-left:-270px;width:540px}#ys-help{margin-top:-220px;margin-left:-270px;width:540px}#fv-ot-yshout .ys-browser{border:none !important;outline:none !important;z-index:102;overflow:auto;background:transparent !important}#fv-ot-yshout-browser{height:580px;width:510px}#cp-browser{height:440px;width:620px;_height:450px;_width:440px}#history-browser{height:440px;width:540px;border-top:1px solid #545454;border-left:1px solid #545454;border-bottom:1px solid #444;border-right:1px solid #444}');
 		
-		$('#threadlist').before('<div id="fv-ot-yshout"></div>');
+		$('#threadlist').before('<div id="fv-ot-yshout">loading sb...</div>');
 		//$('#threadlist').before('<div id="debug"></div>');
 		
 		new YShout({
@@ -2985,6 +3036,328 @@ FireVortex.Parsers = {
 	
 };
 
+FireVortex.Parsers.Search = {
+
+//TODO
+//need to list each site w/uncheck option (store in current storage or create another in preferences?)
+//add button for qrmods/garage of cars
+//move into json request at fv - return dataset for each forum (check/load at product search link open)
+//recent searches - add search term/forum combo; add forum id as array so we can display a list for each active forum. (right now, all searches)
+
+	init: function() {
+		
+		this.loadTESTData();
+		this.loadHtml();
+		
+	},
+	
+	loadHtml: function() {
+	
+		//load only once
+		var standardlist = getStorageObject( 'fv_productsearch' );
+
+		if ( standardlist ) {
+
+			if ( standardlist.forums[ getChildForumId() ] ) {
+				
+				GM_addStyle('#fv-productsearch {width:98%;padding-left:5px;margin-top:10px;} #fv-productsearch-results {max-height:450px; overflow:auto;margin-top: 10px;} #fv-productsearch-results img { max-width: 100px; } #fv-productsearch-results .left { margin-top: 10px; margin-right: 10px; width: 100px; max-width: 100px; float:left; } #fv-productsearch-results .price { color: red; font-weight: bold; } #fv-query { width: 65%; } #fv-productsearch-form .button { padding: 3.5px 6px ! important } #fv-productsearch-form input { margin-right: 10px; font-size: 18px ! important; } #fv-productsearch h3 { font-size: 12px; font-weight: bold; } #fv-productsearch-results h2 {margin-top 8px; margin-bottom: 5px} #fv-productsearch h2 { font-size: 14px; font-weight: bold; } #fv-productsearch h1 { color: #333; font-size: 18px; font-weight: bold; margin-bottom: 8px;} #fv-productsearch-search li { display: inline; list-style-type: none; padding-right: 20px; margin-bottom: 8px;} ');
+			
+				$('#forumdisplaypopups').prepend('<li id="fv-productsearchtools" class="popupmenu nohovermenu"><h6><a class="popupctrl" href="javascript://">Product Search <span style="color:#CE6D0D">[beta]</span></a></h6></li>');
+			
+				$('#threadlist').before('<div id="fv-productsearch" class="threadlist"></div>');
+				$('#fv-productsearch').hide();
+				
+				//inputbox to captures form - clear out existing product results div onsubmit
+				$('#fv-productsearch').append('<div id="fv-productsearch-search"><form class="" id="fv-productsearch-form" name="fv-productsearch-form" action=""><div class="section"><div class="blockrow"><input type="text" value="" tabindex="1" id="fv-query" name="fv-query" class="textbox primary"><input type="submit" accesskey="s" tabindex="1" value="Search for Products" name="dosearch" class="button"></div></div></form></div>');
+				$('#fv-productsearch').append('<div id="fv-productsearch-companies"><div class="section"><div class="blockrow">sites: </div></div></div>');
+				$('#fv-productsearch').append('<div id="fv-productsearch-results"></div>');
+				
+				
+				var standardlist = getStorageObject( 'fv_productsearch' );
+				var sites = standardlist.forums[ getChildForumId() ];
+		
+				if ( sites && sites.length ) {
+					for ( var i = 0; i < sites.length; i++ ) {
+						$('#fv-productsearch-companies .blockrow').append('<i>'+ sites[i].name +'('+ sites[i].label +')</i> ');
+					}
+				}
+				
+				
+				$('#fv-productsearchtools h6 a').bind('click', function( e ){
+					$('#fv-productsearch').slideToggle('slow');
+					e.stopPropagation();
+				});
+	
+				this.parseTESTSearches( sites );
+				
+			}
+		}
+	
+	},
+
+
+	parseTESTSearches: function( sites ) {
+
+
+		$('#fv-productsearch-form').submit(function(e) {
+	
+			$('#fv-productsearch-results').remove();
+			$('#fv-productsearch').append('<div id="fv-productsearch-results"></div>');
+	
+		    var query = $('#fv-query').val();
+	
+			//check if empty
+			if (!query || query == '') {
+				
+				alert('enter something...');
+				
+				e.preventDefault();
+				e.stopPropagation();
+				return false;
+				
+			}
+			
+			query = encodeURIComponent( query );
+	
+			if ( sites && sites.length ) {
+				for ( var i = 0; i < sites.length; i++ ) {
+										
+					if ( sites[i].type == 'GET' && sites[i].fullaction ) {
+						theaction = sites[i].action.replace( sites[i].argname +'=', sites[i].argname +'='+ query );
+						dataform = null;
+					} else {
+						theaction = sites[i].action;
+						dataform = sites[i].argname +'='+ query;
+						if ( sites[i].serializedinputs ) dataform = sites[i].serializedinputs +'&'+ dataform;	
+					}
+					
+					$('#fv-productsearch-results').append('<div class="section"><div class="blockrow"><h1><a class="fv-productsearchurl" href="'+ sites[i].url +'">'+ sites[i].name +'</a> ('+ sites[i].label +') >> <a href="'+ theaction +'">Full Search</a></h1><ol class="fv-productsearch-company" id="fv-productsearch-results-'+ i +'"><li id="loading-'+ i +'">loading search results...</li></ol></div></div>');
+					
+					
+//console.log('---');
+//console.log('FIREVORTEX: Ajax: ('+ i +') type: '+ sites[i].type +' url:'+ theaction +' data:'+ dataform );
+//console.log('---');
+					
+					$.ajax({
+						cache: false,
+						type: sites[i].type,
+						url: theaction,
+						dataType: 'html',
+						xhr: function() { return new GM_XHR(); },
+						data: dataform,
+						success: FireVortex.Parsers.Search.updateTESTSearchResults( i, sites[i] ),
+						error: function(xhr) {
+							alert ("Oopsie: " + xhr.statusText);
+						}
+			
+					});
+				}
+			}
+			
+			e.preventDefault();
+			e.stopPropagation();
+			return false;
+			
+		});
+
+	},
+
+	updateTESTSearchResults: function(loop_index, loop_site) {
+	
+	    return function( html_data ) {
+	    
+//console.log('---');
+//console.log('FIREVORTEX: index: '+ loop_index );
+//console.log('FIREVORTEX: site: '+ loop_site.name );
+			
+			$('#loading-'+ loop_index).remove();
+			
+			listobj = $(html_data).find( loop_site.selector.loop );
+			
+			//loop over dom set
+			$.each(listobj, function() {
+				var desc  = $(this).find( loop_site.selector.description ).text();
+				var link  = $(this).find( loop_site.selector.link ).attr('href');
+				if ( !link.startsWith('http://') ) {
+					if ( link.startsWith == '/' ) {
+						link = loop_site.url + link;
+					} else {
+						link = loop_site.url +'/'+ link;
+					}
+				}
+				var price = $(this).find( loop_site.selector.price ).text();
+				var thumb = $(this).find( loop_site.selector.thumb ).attr('src');
+				
+				if (thumb) {
+				
+					if ( !thumb.startsWith('http://') ) {
+						if ( thumb.startsWith == '/' ) {
+							thumb = loop_site.url + thumb;
+						} else {
+							thumb = loop_site.url +'/'+ thumb;
+						}
+					}
+				
+					thumb = '<img src="'+ thumb +'"/>';
+					
+				} else {
+					thumb = '';
+				}
+			
+				results = '<a href="'+ link +'">'+ desc +'</a><br/><span class="price">'+ price +'</span>';
+				
+				$('#fv-productsearch-results-'+ loop_index).append('<li class="fv-productsearch-results-item"><div id="wrap" style="width:100%"><div class="left">'+ thumb +'</div><div class="right">'+ results +'</div></div><div style="clear:both;"></div></li>');
+				
+				//this might be shitty in jquery land to re-add the same selector - since we have a loop for each sites
+				
+				
+			});
+			
+			$('.fv-productsearch-results-item a').live('click', function() {
+				
+					var url     = $(this).attr('href');
+					var title    = $(this).text();
+					var price = $(this).parent().parent().find( 'span.price' ).text();
+					title = title + ' :: <span class="price">'+ price +'</span>';
+				
+					//pull tracked thread list
+					var recentProducts = getStorageObject('fv_recentviewedproductsearch');
+				
+					if ( recentProducts && recentProducts.urls && recentProducts.titles ) {
+							
+						var i = $.inArray( url , recentProducts.urls );
+						
+						if ( i != -1 ) {
+							recentProducts.urls.splice(i, 1);
+							recentProducts.titles.splice(i, 1);
+						}
+						
+						if ( recentProducts.urls.length > 34 ) {
+							recentProducts.urls.shift();
+							recentProducts.titles.shift();
+						}
+						
+						recentProducts.urls.push( url );
+						recentProducts.titles.push( title );
+						recentProducts.updated = new Date();
+					
+						setStorageObject('fv_recentviewedproductsearch' , recentProducts);
+						
+					} else {
+					
+						recentlist = { "updated" : new Date(), "urls" : new Array(), "titles" : new Array() };
+						recentlist.urls.push( url );
+						recentlist.titles.push( title );
+							
+						setStorageObject('fv_recentviewedproductsearch' , recentlist);
+						
+					}
+				
+			}).css( 'cursor', 'pointer');
+			
+			
+	    };
+		
+	},
+	
+	loadTESTData: function() {
+		
+		//load only once
+		var standardlist = getStorageObject( 'fv_productsearch' );
+
+		if ( !standardlist ) {
+
+			var searches = { "updated" : null, "version" : "120528", "forums" : null };
+
+			var forums = {};
+
+			//
+			//our test data structure. 
+			//
+			
+			var NAMselector = { "loop": ".itemDisplay", "description": ".details p a", "price": ".addtoCart p.large", "link": ".details p a", "thumb": ".imagebox a img" };
+			var NGPselector = { "loop": ".product-container", "description": "a.product-title", "price": "div.product-prices span.price span.price", "link": "a.product-title", "thumb": ".product-item-image a img" };
+
+			//golf iii
+			var sites = new Array();
+			
+			var site = { "cid": 5, "label": "Golf/Jetta", "name": "NGP Racing", "logourl": "http://www.ngpracing.com/store/skins/default_blue/customer/images/ngp-logo.gif", "url": "http://www.ngpracing.com", "fullaction" : true, "type": "GET", "action":"http://www.ngpracing.com/store/index.php?subcats=Y&type=extended&status=A&pshort=Y&pfull=Y&pname=Y&pkeywords=Y&search_performed=Y&cid=1&q=&dispatch=products.search&sort_by=position&sort_order=desc", "serializedinputs": null, "argname": "q", "selector": NGPselector };
+			sites.push(site);
+			
+			forums['3'] = sites;
+
+			//golf iv
+			var sites = new Array();
+			
+			var site = { "cid": 6, "label": "Golf/GTI", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-Golf/GTI-IV", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+
+			var site = { "cid": 6, "label": "Jetta", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-Jetta-IV", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+			
+			var site = { "cid": 5, "label": "Golf/Jetta", "name": "NGP Racing", "logourl": "http://www.ngpracing.com/store/skins/default_blue/customer/images/ngp-logo.gif", "url": "http://www.ngpracing.com", "fullaction" : true, "type": "GET", "action":"http://www.ngpracing.com/store/index.php?subcats=Y&type=extended&status=A&pshort=Y&pfull=Y&pname=Y&pkeywords=Y&search_performed=Y&cid=7&q=&dispatch=products.search&sort_by=position&sort_order=desc", "serializedinputs": null, "argname": "q", "selector": NGPselector };
+			sites.push(site);
+			
+			forums['4'] = sites;
+
+			//golf iv r32
+			var sites = new Array();
+			
+			var site = { "cid": 6, "label": "Golf R32", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-R32-(MKIV)&Year=2004", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+			
+			forums['145'] = sites;
+
+
+			//golf jetta v
+			var sites = new Array();
+			
+			var site = { "cid": 6, "label": "Golf/GTI", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-GTI-V", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+			
+			var site = { "cid": 6, "label": "Jetta", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-Jetta-V", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+
+			var site = { "cid": 5, "label": "Golf/Jetta", "name": "NGP Racing", "logourl": "http://www.ngpracing.com/store/skins/default_blue/customer/images/ngp-logo.gif", "url": "http://www.ngpracing.com", "fullaction" : true, "type": "GET", "action":"http://www.ngpracing.com/store/index.php?subcats=Y&type=extended&status=A&pshort=Y&pfull=Y&pname=Y&pkeywords=Y&search_performed=Y&cid=8&q=&dispatch=products.search&sort_by=position&sort_order=desc", "serializedinputs": null, "argname": "q", "selector": NGPselector };
+			sites.push(site);
+			
+			forums['142'] = sites;
+			
+			
+			//golf vi
+			var sites = new Array();
+			
+			var site = { "cid": 6, "label": "Golf", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword=&refine=y&Makemodel=Volkswagen-Golf/GTI-VI", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+			
+			var site = { "cid": 5, "label": "Golf", "name": "NGP Racing", "logourl": "http://www.ngpracing.com/store/skins/default_blue/customer/images/ngp-logo.gif", "url": "http://www.ngpracing.com", "fullaction" : true, "type": "GET", "action":"http://www.ngpracing.com/store/index.php?subcats=Y&type=extended&status=A&pshort=Y&pfull=Y&pname=Y&pkeywords=Y&search_performed=Y&cid=2015&q=&dispatch=products.search&sort_by=position&sort_order=desc", "serializedinputs": null, "argname": "q", "selector": NGPselector };
+			sites.push(site);
+			
+			forums['1136'] = sites;
+
+
+			//jetta vi
+			var sites = new Array();
+			
+			var site = { "cid": 6, "label": "Jetta", "name": "North American Motorsports", "logourl": "http://www.namotorsports.net/images/nam.gif", "url": "http://www.namotorsports.net", "fullaction" : true, "type": "GET", "action":"http://www.namotorsports.net/Keyword&refine=y&Makemodel=Volkswagen-Jetta-VI", "serializedinputs": null, "argname": "Keyword", "selector": NAMselector };
+			sites.push(site);
+			
+			var site = { "cid": 5, "label": "Jetta", "name": "NGP Racing", "logourl": "http://www.ngpracing.com/store/skins/default_blue/customer/images/ngp-logo.gif", "url": "http://www.ngpracing.com", "fullaction" : true, "type": "GET", "action":"http://www.ngpracing.com/store/index.php?subcats=Y&type=extended&status=A&pshort=Y&pfull=Y&pname=Y&pkeywords=Y&search_performed=Y&cid=2015&q=&dispatch=products.search&sort_by=position&sort_order=desc", "serializedinputs": null, "argname": "q", "selector": NGPselector };
+			sites.push(site);
+			
+			forums['5310'] = sites;
+			
+			searches.forums = forums;
+
+			searches.updated = new Date();
+			setStorageObject('fv_productsearch' , searches);
+
+		}
+		
+	},
+	
+};
+
 FireVortex.UI = {
 	
 };
@@ -3379,6 +3752,7 @@ FireVortex.UI.Options = {
 		if ( $('.standard_error').length == 0 ) {
 			this.loadHtml();
 			this.loadOptions();
+			$("time.timeago").timeago();
 		}
 	},
 	
@@ -3394,6 +3768,9 @@ FireVortex.UI.Options = {
 		GM_addStyle('#fv-edit-emoticonlist-panel p { margin:10px 0; } #fv-edit-emoticonlist-panel p:first-child span.emoticon-remove { display:none; } .emoticon-preview{ padding-left: 5px;padding-right:3px; } .emoticon-remove { color:red; cursor:pointer;} .emoticon-add { color:green; cursor:pointer;}');
 		
 		$('body').prepend('<div class="above_body"></div><div class="body_wrapper"><div class="breadcrumb"id="breadcrumb"><ul class="floatcontainer"><li class="navbithome"><a accesskey="1"href="index.php"><img alt="Home"src="/images/vmg/misc/navbit-home.png"title="Home"></a></li><li class="navbit"><a href="usercp.php">Settings</a></li><li class="navbit lastnavbit"><span>Edit FireVortex</span></li></ul><hr></div><br style="clear:both;"/><div id="usercp_content"><div class="cp_content"><form id="profileform"class="block"><h2 class="blockhead">Edit FireVortex Settings</h2><div class="blockbody formcontrols settings_form_border"><h3 class="blocksubhead">General</h3><div class="section"><div class="blockrow"><label for="myPage">My FireVortex</label><div class="rightcol"><select tabindex="1" id="myPage" class="primary" name="myPage"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="myPageItemsNewPostThreadSubscriptions">New Post Items</label><select tabindex="1" id="myPageItemsNewPostThreadSubscriptions" name="myPageItemsNewPostThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsThreadSubscriptions">Thread Subscription Items</label><select tabindex="1" id="myPageItemsThreadSubscriptions" name="myPageItemsThreadSubscriptions"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsRecentThreads">Recently Viewed Threads Items</label><select tabindex="1" id="myPageItemsRecentThreads" name="myPageItemsRecentThreads"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><div class="rightcol"><label for="myPageItemsRecentSearches">Recent Search Items</label><select tabindex="1" id="myPageItemsRecentSearches" name="myPageItemsRecentSearches"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option></select></div><p class="description">Displays New Posts, Subscribed Topics, and Subcribed Forums feeds on forum homepage when logged in.</p></div><div class="blockrow"><label for="fullIgnoreUser">Extend Ignore Users</label><div class="rightcol"><select tabindex="1"id="fullIgnoreUser"class="primary"name="fullIgnoreUser"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes threads started by,quotes,and removes vBulletins ignore user message post.</p></div><div class="blockrow"><label for="keyBindHidePage">Hide Page</label><div class="rightcol"><select tabindex="3"id="keyBindHidePage"class="primary"name="keyBindHidePage"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Use the keyboard shortcut:alt+z which toggles page blank.</p></div><div class="blockrow"><label for="superSizeMe">SuperSize Forums</label><div class="rightcol"><select tabindex="2"id="superSizeMe"class="primary"name="superSizeMe"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removes all extra whitespace,banners,header and footer.<a href="http://adblockplus.org/en/">Adblock Plus</a> (available for Chrome too) is recommended to increase browsing performance. Enter this filter subscription url: http:\/\/update.firevortex.net\/abp\/vmg.supersizeme.txt</p><p class="description">You can add filter subscriptions by opening Adblock Plus preferences.Then add a new subscription by going to menu Filters/Add filter subscription.Once you are done with your changes click OK.</p></div></div><h3 class="blocksubhead">Forums</h3><div class="section"><div class="blockrow"><label for="forumKillThreads">Kill a Thread</label><div class="rightcol"><select tabindex="4"id="forumKillThreads"class="primary"name="forumKillThreads"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Removed selected threads from view within a forum category</p></div><div class="blockrow"><label for="forumKillAllStickies">Kill Stickies</label><div class="rightcol"><select tabindex="5"id="forumKillAllStickies"class="primary"name="forumKillAllStickies"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove stickies</p></div><div class="blockrow"><label for="forumKillAllLocks">Kill Locked</label><div class="rightcol"><select tabindex="6"id="forumKillAllLocks"class="primary"name="forumKillAllLocks"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove locked threads</p></div><div class="blockrow"><label for="previewHover">Preview Posts</label><div class="rightcol"><select tabindex="7"id="previewHover"class="primary"name="previewHover"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview the first or last post for a given thread.</p></div><div class="blockrow"><label for="forumThreadsPreview">Preview Topics</label><div class="rightcol"><select tabindex="7"id="forumThreadsPreview"class="primary"name="forumThreadsPreview"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Preview new topics for a given forum.</p></div><div class="blockrow"><label for="forumLinkedClassifieds">Linked Classifieds</label><div class="rightcol"><select tabindex="7" id="forumLinkedClassifieds" class="primary" name="forumLinkedClassifieds"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Display new topics feeds for linked Parts and Cars classifieds in a sub model forum</p></div><div class="blockrow"><label>Page Refresh Timer</label><div class="rightcol"><label for="forumRefresh"></label><select tabindex="4"id="forumRefresh"class="primary"name="forumRefresh"><option value="1">Enable</option><option value="0">Disable</option></select></div><div class="rightcol"><label for="forumRefreshRate">Rate(Minutes)</label><select tabindex="1"id="forumRefreshRate"name="forumRefreshRate"><option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option></select></div><p class="description">Auto-refresh a forum category and my post pages.</p></div></div><h3 class="blocksubhead">Topics</h3><div class="section"><div class="blockrow"><label for="threadQuickReply">Quick Reply</label><div class="rightcol"><select tabindex="1"id="threadQuickReply"class="primary"name="threadQuickReply"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><div class="blockrow"><label for="threadFirstPostExcerpt">View First Post Excerpt</label><div class="rightcol"><select tabindex="2"id="threadFirstPostExcerpt"class="primary"name="threadFirstPostExcerpt"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Displays the excerpt of the first post on each page.</p></div><div class="blockrow"><label for="threadKillQuotedImages">Remove Quoted Images</label><div class="rightcol"><select tabindex="3"id="threadKillQuotedImages"class="primary"name="threadKillQuotedImages"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove(replaced with a link)images within quoted posts.</p></div><div class="blockrow"><label for="threadKillQuoteInSigs">Remove Quotes in Signatures</label><div class="rightcol"><select tabindex="3"id="threadKillQuoteInSigs"class="primary"name="threadKillQuoteInSigs"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove quotes within signatues.</p></div><div class="blockrow"><label for="threadKillItalicQuotesText">Remove Italic text in Quotes</label><div class="rightcol"><select tabindex="3" id="threadKillItalicQuotesText" class="primary" name="threadKillItalicQuotesText"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Remove the italics font from quoted text</p></div><div class="blockrow"><label for="emoticons">Enable Emoticons</label><div class="rightcol"><select tabindex="3" id="emoticons" class="primary" name="emoticons"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description">Enable custom emoticons on thread reply/post/quick reply.</p></div><div class="blockrow singlebutton"><label>Emoticons:</label><div class="rightcol"><a id="fv-edit-emoticonlist" class="button">Edit Emoticon List</a></div><div id="fv-edit-emoticonlist-panel"></div><p class="description">Add your own emoticon image links (use full url, ie http://somedomain.com/someonestolenimage.gif ).</p></div></div><h3 class="blocksubhead">Highlight</h3><div class="section"><div class="blockrow"><label for="threadUserHighlight">User Highlight</label><div class="rightcol"><select tabindex="3"id="threadUserHighlight"class="primary"name="threadUserHighlight"><option value="1">Enable</option><option value="0">Disable</option></select></div><p class="description"></p></div><fieldset class="blockrow"><legend>Highlight Colors</legend><ul class="group"><li><select tabindex="3" id="threadUserHighlightOwn" class="primary" name="threadUserHighlightOwn"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorOwn">Self:</label><input type="hidden" value="" name="threadUserHighlightColorOwn" id="threadUserHighlightColorOwn" class="colors"></li><li><select tabindex="3" id="threadUserHighlightAdvertisers" class="primary" name="threadUserHighlightAdvertisers"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorBanner">Banner Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorBanner" id="threadUserHighlightColorBanner" class="colors"></li><li><label for="threadUserHighlightColorClassified">Classified Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorClassified" id="threadUserHighlightColorClassified" class="colors"></li><li><label for="threadUserHighlightColorForum">Forum Advertiser:</label><input type="hidden" value="" name="threadUserHighlightColorForum" id="threadUserHighlightColorForum" class="colors"></li><li><select tabindex="3" id="threadUserHighlightVMG" class="primary" name="threadUserHighlightVMG"><option value="1">Enable</option><option value="0">Disable</option></select></li><li><label for="threadUserHighlightColorVMG">VMG Staff, Moderators, Admins</label><input type="hidden" value="" name="threadUserHighlightColorVMG" id="threadUserHighlightColorVMG" class="colors"></li><li><label for="threadUserHighlightColorFV">FireVortex Admin</label><input type="hidden" value="" name="threadUserHighlightColorFV" id="threadUserHighlightColorFV" class="colors"></li><li><select tabindex="3" id="threadUserHighlightIgnore" class="primary" name="threadUserHighlightIgnore"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorIgnore">Ignored Users</label><input type="hidden" value="" name="threadUserHighlightColorIgnore" id="threadUserHighlightColorIgnore" class="colors"></li><li><select tabindex="3" id="threadUserHighlightBuddy" class="primary" name="threadUserHighlightBuddy"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadUserHighlightColorBuddy">Friends and Following</label><input type="hidden" value="" name="threadUserHighlightColorBuddy" id="threadUserHighlightColorBuddy" class="colors"></li><li><select tabindex="3" id="forumSubscriptionHighlight" class="primary" name="forumSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="forumSubscriptionHighlightColor">Subscribed Forums</label><input type="hidden" value="" name="forumSubscriptionHighlightColor" id="forumSubscriptionHighlightColor" class="colors"></li><li><select tabindex="3" id="threadSubscriptionHighlight" class="primary" name="threadSubscriptionHighlight"><option value="1">Enable</option><option value="0">Disable</option></select><label for="threadSubscriptionHighlightColor">Subscribed Topics</label><input type="hidden" value="" name="threadSubscriptionHighlightColor" id="threadSubscriptionHighlightColor" class="colors"></li></ul><p class="description"></p></fieldset></div></div><div class="blockfoot actionbuttons settings_form_border"><div class="group"><input id="savefvsettings"type="submit"accesskey="s"tabindex="1"value="Save Changes"class="button"></div><div class="confirm"></div></div></form></div></div><div id="usercp_nav"><div class="block"></div></div></div>');
+		
+		$('#fv-footer').append('<p style="margin-top:10px;"><a href="'+ SERVER_HOST +'/profile.php?do=debugfirevortex"">Debug FireVortex Data and Settings</a></p><p>FireVortex was Created <time class="timeago" datetime="Sun Feb 25 2007 22:14:53">Sun Feb 25 2007</time></p>');
+		
 	},
 	
 	loadOptions: function() {
@@ -3667,9 +4044,29 @@ FireVortex.UI.Debug = {
 
 		$('.cp_content').append( "<div style='margin-bottom:25px;'><h2>Recent Searches List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject('fv_recentsearches') ) +"</code></p></div>" );
 		
+		$('.cp_content').append( "<div style='margin-bottom:25px;'><h2>Recent Product Searches List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject('fv_recentviewedproductsearch') ) +"</code></p></div>" );
+		
 		$('.cp_content').append( "<div><h2>Emoticon List</h2><p style='margin-top:5px;'><code>"+ JSON.stringify( getStorageObject( 'fv_emoticonlist' ) ) +"</code></p></div>" );
 
-						
+datalength = 1024 * 1024 * 5 - unescape( encodeURIComponent( JSON.stringify( w.localStorage ) ) ).length;
+		$('.cp_content').append( "<div style='margin-top:25px;'><h2>Storage</h2><p style='margin-top:5px;'><code>"+ datalength +" / 5242880 (5MB) </code> - <a style='color:red' id='fv-debug-resetalldata' href='"+ SERVER_HOST +"/profile.php?do=debugfirevortex'>Delete all saved data</a></p></div>" );
+		
+		$('#fv-debug-resetalldata').click(function(e) {
+
+			var r = confirm("This will reset all data storage");
+		
+			if ( r == true ) {
+				FireVortex.Scripts.logout();
+				
+				w.localStorage.removeItem('fv_emoticonlist');
+				
+			} else {
+				
+			}
+			
+		});
+		
+		
 	},
 	
 };
